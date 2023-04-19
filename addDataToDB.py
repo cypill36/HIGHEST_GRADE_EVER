@@ -1,11 +1,20 @@
 import pymysql
-import csi3335sp2023 as cfg
+import os
+import csi3335 as cfg
 
 con = pymysql.connect(host=cfg.mysql['location'],
                       user=cfg.mysql['user'],
                       password=cfg.mysql['password'],
                       database=cfg.mysql['database'])
 
+directory = "./CSVfiles"
+tables = []
+for filename in os.listdir(directory):
+    f = os.path.join(directory, filename)
+    if os.path.isfile(f):
+        tables.append(filename[8:].split(".")[0])
+        print(tables[-1])
+# exit(1)
 inFile = open("./CSVfiles/ModifiedBatting.csv")
 
 try:
@@ -42,33 +51,11 @@ try:
                 values += "'"
             values += ", "
 
-
         values = values[:-2]
-        # search for entry in database
-        sqlFind = "SELECT * FROM batting WHERE "
-        for c, s in zip(column_names, splitLine):
-            sqlFind += c;
-            if s == "NA" or s == "\n" or s == "":
-                s = "NULL"
-            s = s.strip()
-            s = s.replace('\'', '\\\'')
 
-            if s == "NULL":
-                sqlFind += " IS NULL"
-            else:
-                sqlFind += " = "
-                if not s.isnumeric():
-                    sqlFind += "'"
-                sqlFind += s
-                if not s.isnumeric():
-                    sqlFind += "'"
-            sqlFind += " AND "
 
-        cur.execute(sqlFind[:-4])
-        result = cur.fetchall()
-
-        if len(result) == 0:
-            print(sqlFind[:-4])
+        # if len(result) == 0:
+           # print(sqlFind[:-4])
            # cur.execute(sql % values)
 
 except Exception:
@@ -81,3 +68,30 @@ finally:
     con.close()
 
 inFile.close()
+
+
+def check_in_database(table_name):
+    # search for entry in database
+    sqlFind = "SELECT * FROM batting WHERE "
+    for c, s in zip(column_names, splitLine):
+        if s == "NA" or s == "\n" or s == "":
+            s = "NULL"
+        s = s.strip()
+        s = s.replace('\'', '\\\'')
+
+        if s != "NULL":
+            sqlFind += c
+            sqlFind += " = "
+            if not s.isnumeric():
+                sqlFind += "'"
+            sqlFind += s
+            if not s.isnumeric():
+                sqlFind += "'"
+            sqlFind += " AND "
+
+    cur.execute(sqlFind[:-4])
+    result = cur.fetchall()
+    in_database = True
+    if len(result) == 0:
+        in_database = False
+    return in_database
