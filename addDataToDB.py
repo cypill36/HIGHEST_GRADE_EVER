@@ -87,7 +87,7 @@ try:
         if os.path.isfile(f):
             counter += 1
             inFile = open(f)
-            table_name = (filename[8:].split(".")[0])
+            table_name = (filename[9:].split(".")[0])
             sql = '''SELECT * FROM ''' + table_name
             cur.execute(sql)
             column_names = [i[0] for i in cur.description]
@@ -111,7 +111,7 @@ try:
                 sql += c + ", "
 
             sql = sql[:-2]
-            sql += ") VALUES( {} )"  # TODO: change back for executing
+            sql += ") VALUES( %s )"
             prev_sql = sql
 
             has_year_id = -1
@@ -125,7 +125,7 @@ try:
             while lines := inFile.readline():
 
                 sql = prev_sql
-                values = where = ""
+                values = ""
                 splitLine = lines.split(",")
 
                 # check before inserting
@@ -133,20 +133,22 @@ try:
                 if (has_year_id != -1 and year_22()) or (has_year_id == -1 and not check_in_database()):
                     insert = True
                     if len(keys) > 0 and check_in_database_primary_keys():
-                        sql = "UPDATE " + table_name + " SET {}"
-                        where += " WHERE "
+                        sql = "UPDATE " + table_name + " SET %s WHERE "
                         update = True
 
                 if insert:
 
                     for c, s in zip(column_names, splitLine):
+                        print(c + " " + s)
                         if c not in keys or not update:
                             if update:
-                                values += c + "="
-                            if s == "NA" or s == "\n":
+                                values += "`" + c + "`" + "="
+                            if s == "NA" or s == "\n" or len(s) == 0:
                                 s = "NULL"
                             s = s.strip()
-                            s = s.replace('\'', '\\\'')
+                            print(s)
+                            # s = s.replace('\'', '\\\'')
+                            print(s)
                             if not s.isnumeric() and s != "NULL":
                                 values += "'"
                             values += s
@@ -154,19 +156,21 @@ try:
                                 values += "'"
                             values += ", "
                         else:
-                            where += c + "="
-                            if s == "NA" or s == "\n":
+                            sql += "`" + c + "`" + "="
+                            if s == "NA" or s == "\n" or len(s) == 0:
                                 s = "NULL"
                             s = s.strip()
                             s = s.replace('\'', '\\\'')
                             if not s.isnumeric() and s != "NULL":
-                                where += "'"
-                            where += s
+                                sql += "'"
+                            sql += s
                             if not s.isnumeric() and s != "NULL":
-                                where += "'"
-                            where += ", "
-                    values = values[:-2] + where[:-2]
-                    print(sql.format(values))  # cur.execute(sql, values)
+                                sql += "'"
+                            sql += ", "
+                    values = values[:-2]
+                    sql = sql[:-2]
+                    print(repr(sql.replace("%s", "{}").format(values)))  #
+                    cur.execute(sql, values)
             inFile.close()
 
 except Exception:
