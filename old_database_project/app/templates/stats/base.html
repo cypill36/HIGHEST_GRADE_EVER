@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+=======
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.1/css/jquery.dataTables.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script type="text/javascript" charset="utf8"
+        src="https://cdn.datatables.net/1.13.1/js/jquery.dataTables.js"></script>
+>>>>>>> 3e95c82985593e0e87eec8301c088e9f6d3e6601
+    <title>KJJ Baseball</title>
+</head>
+
+<body class="bg-slate-900">
+    <div class="mx-60 mt-4 flex flex-row items-baseline justify-between">
+        <h1 class="text-white text-xl font-bold mb-4">Hello {{ user.username }}</h1>
+        {% if user.isAdmin %}
+        <p class="rounded bg-blue-600 px-4 py-2 text-white mt-4 hover:bg-blue-800 hover:cursor-pointer ease-in-out duration-300"
+            id="admin-portal-button">Admin portal</p>
+        {% endif %}
+    </div>
+
+    {% block content %}
+    {% endblock %}
+</body>
+
+<script>
+    $("#admin-portal-button").click(function () {
+        location.href = "/admin"
+    })
+</script>
+
+</html>

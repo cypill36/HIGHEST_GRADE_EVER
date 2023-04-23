@@ -1,0 +1,48 @@
+{% extends 'stats/base.html' %}
+
+{% block content %}
+<div>
+    <div class="flex justify-center mt-20 flex-col px-60">
+        <h1 class="text-white text-xl font-bold mb-4">View division standings</h1>
+        <div class="flex flex-row">
+            <select class="select w-full" id="team-name-select">
+                {% for team in teams %}
+                <option value="{{ team.team_name }}">{{ team.team_name }}</option>
+                {% endfor %}
+            </select>
+            <select class="select w-full" id="team-year-select">
+            </select>
+        </div>
+        <button class="rounded w-full bg-blue-600 p-1.5 text-white mt-4 hover:bg-blue-800 ease-in-out duration-300"
+            id="view-standings-button">View</button>
+    </div>
+</div>
+
+<script>
+    function loadYears() {
+        var http = new XMLHttpRequest();
+        http.open("GET", "/get_years?team_name=" + $("#team-name-select").val(), false)
+        http.send();
+
+        var year_select = document.getElementById("team-year-select")
+        for (a in year_select) { year_select.options.remove(0); }
+
+        const years = JSON.parse(http.responseText)
+        for (var i = 0; i < years.length; i++) {
+            year_select.options[year_select.options.length] = new Option(years[i], years[i])
+        }
+    }
+
+    $(document).ready(function () {
+        $(".select").select2();
+        loadYears();
+    })
+
+    $("#division-name-select").on('change', loadYears)
+    $("#team-name-select").on('change', loadYears)
+
+    $("#view-standings-button").click(function () {
+        location.href = "/standings?team_name=" + $("#team-name-select").val() + "&year_id=" + $("#team-year-select").val()
+    })
+</script>
+{% endblock %}

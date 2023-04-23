@@ -1,0 +1,65 @@
+{% extends 'stats/base.html' %}
+
+{% block content %}
+<div class="mt-4 mb-12 px-60 w-full">
+<<<<<<< HEAD
+    <p class="text-blue-600 underline hover:cursor-pointer mb-4" id="back-home-button">Back</p>
+=======
+    <p class="text-blue-600 underline hover:cursor-pointer mb-4 w-10" id="back-home-button">Back</p>
+>>>>>>> 3e95c82985593e0e87eec8301c088e9f6d3e6601
+    {% if division_name is not none %}
+    <h1 class="text-4xl text-white font-bold mb-4">{{ division_name }} - {{ year_id }}</h2>
+        {% else %}
+        <h1 class="text-4xl text-white font-bold mb-4">{{ league_name }} - {{ year_id }}</h2>
+            {% endif %}
+<<<<<<< HEAD
+            <table class="w-full">
+=======
+            <table class="w-full" id="playoff-table">
+>>>>>>> 3e95c82985593e0e87eec8301c088e9f6d3e6601
+                <tr class="text-left text-white">
+                    <th>Rank</th>
+                    <th>Team Name</th>
+                    <th>Wins</th>
+                    <th>Losses</th>
+                    <th>Win %</th>
+                    <th>Games behind</th>
+                </tr>
+                {% for team in standings %}
+                {% if team.team_name == team_name %}
+<<<<<<< HEAD
+                <tr class="text-left text-yellow-400">
+=======
+                {% if team.made_playoffs %}
+                <tr class="text-left text-yellow-400 underline hover:cursor-pointer">
+                    {% else %}
+                <tr class="text-left text-yellow-400">
+                    {% endif %}
+>>>>>>> 3e95c82985593e0e87eec8301c088e9f6d3e6601
+                    {% else %}
+                <tr class="text-left text-slate-400">
+                    {% endif %}
+                    <th>{{ team.rank }}.</th>
+                    <td>{{ team.name }}</td>
+                    <td>{{ team.wins }}</td>
+                    <td>{{ team.losses }}</td>
+                    <td>{{ team.win_percentage }}%</td>
+                    <td>{{ team.games_behind }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+</div>
+
+<script>
+    $("#back-home-button").click(function () {
+        location.href = "/"
+    })
+<<<<<<< HEAD
+=======
+
+    $("#playoff-table tr").click(function () {
+        location.href = "/playoffs?team_name=" + $(this).children("td").html() + "&year_id={{ year_id }}"
+    })
+>>>>>>> 3e95c82985593e0e87eec8301c088e9f6d3e6601
+</script>
+{% endblock %}

@@ -1,0 +1,51 @@
+<<<<<<< HEAD
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    Hello admin!
+</body>
+
+</html>
+=======
+{% extends 'stats/base.html' %}
+
+{% block content %}
+<div class="px-60 mt-8">
+    <h1 class="text-4xl text-white font-bold mb-4">Logs</h1>
+    <table id="logs-table" class="text-white">
+        <thead class="text-white">
+            <tr>
+                <th>Username</th>
+                <th>Team Name</th>
+                <th>Year ID</th>
+                <th>Accessed</th>
+            </tr>
+        </thead>
+        <tbody class="text-gray-400">
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.username }}</td>
+                <td>{{ log.team_name }}</td>
+                <td>{{ log.yearID }}</td>
+                <td>{{ log.timestamp }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#logs-table").DataTable();
+    })
+</script>
+{% endblock %}
+>>>>>>> 3e95c82985593e0e87eec8301c088e9f6d3e6601
