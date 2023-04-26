@@ -5,6 +5,11 @@ from flask_login import current_user, login_user, logout_user
 from app.models import User
 from flask_login import login_required
 from werkzeug.urls import url_parse
+import pymysql
+import sys
+import warnings
+
+con = pymysql.connect(host='localhost', user='yassenarab', password='YA2002ya', database='baseball')
 
 @app.route('/')
 def root():
@@ -27,10 +32,24 @@ def login():
         return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form)
 
+
 @app.route('/index')
 @login_required
 def index():
-    return render_template("index.html", title='Home Page')
+    teams = []
+    years = []
+    cur = con.cursor()
+    sql = ''' select distinct(team_name) from teams order by team_name ; '''
+    cur.execute(sql)
+    results = cur.fetchall()
+    for x in results:
+        teams.append(x[0])
+    sql = '''  select distinct(yearid) from teams order by yearid ; '''
+    cur.execute(sql)
+    results2 = cur.fetchall()
+    for x in results2:
+        years.append(x[0])
+    return render_template("index.html", title='Home Page',teams=teams, years = years)
 
 @app.route('/logout')
 def logout():
@@ -53,8 +72,7 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
-
-
-
-
-
+@app.route('/submit-form', methods=['POST'])
+@login_required
+def submit_form():
+    return render_template('stats.html',title = 'states')
