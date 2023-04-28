@@ -2,7 +2,18 @@
 
 {% block content %}
   <h1 style="text-align:center">Baseball Stats</h1>
-  <br><br>
+  <br>
+  <h2>Roster for {{ chosenTeam }} in {{ chosenYear }}</h2>
+    <table>
+        <thead>
+	 <tr>
+	  {% for player in roster %}
+	      {{ player }}{% if not loop.last %}, {% endif %}&nbsp
+	  {% endfor %}
+	 </tr>
+	</thead>
+    </table>  
+  <br>
     <h2>Batting Stats</h2>
     <table>
       <thead>

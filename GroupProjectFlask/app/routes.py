@@ -8,8 +8,12 @@ from werkzeug.urls import url_parse
 import pymysql
 import sys
 import warnings
+import csi3335 as cfig
 
-con = pymysql.connect(host='localhost', user='yassenarab', password='YA2002ya', database='baseball')
+#CHANGE
+#con = pymysql.connect(host='localhost', user='yassenarab', password='YA2002ya', database='baseball')
+con = pymysql.connect(host=cfig.con['host'], user=cfig.con['user'], password=cfig.con['password'], database=cfig.con['database'])
+
 
 @app.route('/')
 def root():
@@ -33,7 +37,7 @@ def login():
     return render_template('login.html', title='Sign In', form=form)
 
 
-@app.route('/index')
+@app.route('/index', methods = ['GET', 'POST'])
 @login_required
 def index():
     teams = []
@@ -75,4 +79,35 @@ def register():
 @app.route('/submit-form', methods=['POST'])
 @login_required
 def submit_form():
-    return render_template('stats.html',title = 'states')
+    
+    # Get user selected team and year and pass into the submit 
+    chosenTeam = request.form['team']
+    chosenYear = request.form['year']
+    #session[ 'chosenTeam' ] = request.form['team']
+    #session[ 'chosenYear' ] = request.form['year']
+
+    # Run query to get the roster
+    roster = []
+
+    try:
+        cur = con.cursor()
+        sql = '''SELECT CONCAT(nameFirst, ' ', nameLast) FROM people WHERE playerid IN (SELECT DISTINCT(playerid) FROM batting WHERE yearID = %s AND teamID = (SELECT DISTINCT(teamid) FROM teams WHERE team_name = %s LIMIT 1));'''
+        params = [ chosenYear, chosenTeam ]
+        cur.execute(sql, params)
+        roster = cur.fetchall()
+        
+        rosterList = []
+        for row in roster:
+            for col in row:
+                rosterList.append(col)
+
+    except Exception:
+        con.rollback()
+        print("Database Exception.")
+        raise
+    else:
+        con.commit()
+    return render_template('stats.html', title = 'stats', chosenTeam = chosenTeam, chosenYear = chosenYear, roster = rosterList)
+
+
+
