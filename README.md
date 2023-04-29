@@ -10,6 +10,7 @@ How to Access Website: ...
 
 How to Update Database to Match our Updated Database:
 ```
+\. createTables.sql
 python renameIDs.py
 python add2022Data.py
 ```
