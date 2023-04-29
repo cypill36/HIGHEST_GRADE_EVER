@@ -4,6 +4,8 @@ Members: Yaseen Arab, Alex Kubicek, Kaylynn Beard, Cyril Pillai
 Database Design and Application Final Project
 
 How to Access Website: ...
+```
+```
 
 
 How to Update Database to Match our Updated Database:
@@ -25,3 +27,15 @@ are you from the fbi?
 why do you care? 
 are you good bro ? 
 what is it that you want to know ????
+
+- Updated database with 2022 data (insert and update rows)
+- Renamed all ID attributes with a unique ID (ID -> tableID)
+
+from the website
+- Add user support to the database. This should include (at a minimum) a user name and encrypted password.
+- Write an SQL program to create the user table(s) needed
+- Create a web/database app that requires users to login into the system. Login information must be secure.
+- Once logged in, the user may provide a team name and a year. This should be input from a drop down menu requesting the team name, and then a drop down menu with the valid years. The system will log the selections made by a user.
+- Write a web page to display the roster for the team submitted. Batting and pitching statistics should be separate. For each batter, include the number of games played at each position and his ''slash line,'' consisiting of his batting average, on base percentage and slugging percentage. For each pitcher, include the number of games pitched, the number of games started, the innings pitched (not IPOuts), the WHIP and the strikeouts per 9 innings.
+- Have an admin user (password should be included in your readme file). The admin user can see the logged information for each user and the total requests for all users.
+
