@@ -33,20 +33,20 @@
         </tr>
       </thead>
       <tbody>
-        {% for row in batting_data %}
+        {% for key in battingStats %}
           <tr>
-            <td>{{ row.name }}</td>
-            <td>{{ row.C }}</td>
-            <td>{{ row["1B"] }}</td>
-            <td>{{ row["2B"] }}</td>
-            <td>{{ row["3B"] }}</td>
-            <td>{{ row.SS }}</td>
-            <td>{{ row.LF }}</td>
-            <td>{{ row.CF }}</td>
-            <td>{{ row.RF }}</td>
-            <td>{{ row.batting_avg }}</td>
-            <td>{{ row.obp }}</td>
-            <td>{{ row.slg }}</td>
+            <td>{{ battingStats[key][0] }}</td>
+            <td>{{ battingStats[key][1] }}</td>
+            <td>{{ battingStats[key][2] }}</td>
+            <td>{{ battingStats[key][3] }}</td>
+            <td>{{ battingStats[key][4] }}</td>
+            <td>{{ battingStats[key][5] }}</td>
+            <td>{{ battingStats[key][6] }}</td>
+            <td>{{ battingStats[key][7] }}</td>
+            <td>{{ battingStats[key][8] }}</td>
+            <td>{{ battingStats[key][9] }}</td>
+            <td>{{ battingStats[key][10] }}</td>
+            <td>{{ battingStats[key][11] }}</td>
           </tr>
         {% endfor %}
       </tbody>
