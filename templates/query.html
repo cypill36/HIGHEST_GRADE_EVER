@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Baseball Database</title>
+  </head>
+  <body>
+    <form method="POST" action="/submit-form">
+      <label for="team">Team Name:</label>
+      <select name="team" id="team-select" onchange="updateYears()">
+        {% for team in teams %}
+        <option value="{{ team }}">{{ team }}</option>
+        {% endfor %}
+      </select>
+      <br><br>
+      <label for="year">Year:</label>
+      <select name="year" id="year-select" disabled>
+        <option value="">Select a team first</option>
+      </select>
+      <br><br>
+      <input type="submit" value="Submit">
+    </form>
+    <script>
+      function updateYears() {
+        // Get the selected team from the dropdown
+        var team = document.getElementById("team-select").value;
+
+        // Use AJAX to retrieve the years for the selected team
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/years?team=" + team, true);
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState == 4 && xhr.status == 200) {
+            // Parse the response and update the years dropdown
+            var years = JSON.parse(xhr.responseText);
+            var yearSelect = document.getElementById("year-select");
+            yearSelect.disabled = false;
+            yearSelect.innerHTML = "";
+            for (var i = 0; i < years.length; i++) {
+              var option = document.createElement("option");
+              option.text = years[i];
+              option.value = years[i];
+              yearSelect.add(option);
+            }
+          }
+        };
+        xhr.send();
+      }
+    </script>
+  </body>
+</html>

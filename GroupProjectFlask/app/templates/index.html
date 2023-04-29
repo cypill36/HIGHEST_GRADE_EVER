@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+
+     <br><br>
+     <form method="POST" action="{{ url_for('submit_form') }}">
+     <label for="team"> <b style="font-size: larger;">Team Name : </label>
+     <select name="team" id="team-select" onchange="updateYears()"  style="font-size: 20px; height: 27px;">
+         {% for team in teams %}
+             <option value="{{ team }}"> {{ team }} </option>
+         {% endfor %}
+      </select>
+
+      <br><br>
+      <label for="year"><b style="font-size: larger;">Year:</label>
+      <select name="year" id="year-select"  style="font-size: 20px; height: 27px;">
+           {% for year in years %} 
+                <option value="{{year}}">{{year}}</option>
+          {% endfor %}
+      </select>
+
+      <br><br>
+      <input type="submit" value="Submit" style="width: 200px; height: 25px;">
+    </form>
+
+    <script>
+      function updateYears() {
+        // Get the selected team from the dropdown
+        var team = document.getElementById("team-select").value;
+
+        // Use AJAX to retrieve the years for the selected team
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/years?team=" + team, true);
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState == 4 && xhr.status == 200) {
+            // Parse the response and update the years dropdown
+            var years = JSON.parse(xhr.responseText);
+            var yearSelect = document.getElementById("year-select");
+            yearSelect.disabled = false;
+            yearSelect.innerHTML = "";
+            for (var i = 0; i < years.length; i++) {
+              var option = document.createElement("option");
+              option.text = years[i];
+              option.value = years[i];
+              yearSelect.add(option);
+            }
+          }
+        };
+        xhr.send();
+      }
+    </script>
+
+{% endblock %}
+

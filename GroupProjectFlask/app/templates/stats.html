@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1 style="text-align:center">Baseball Stats</h1>
+  <br>
+  <h2>Roster for {{ chosenTeam }} in {{ chosenYear }}</h2>
+    <table>
+        <thead>
+	 <tr>
+	  {% for player in roster %}
+	      {{ player }}{% if not loop.last %}, {% endif %}&nbsp
+	  {% endfor %}
+	 </tr>
+	</thead>
+    </table>  
+  <br>
+    <h2>Batting Stats</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>C</th>
+          <th>1B</th>
+          <th>2B</th>
+          <th>3B</th>
+          <th>SS</th>
+          <th>LF</th>
+          <th>CF</th>
+          <th>RF</th>
+          <th>BA</th>
+          <th>OBP</th>
+          <th>SLG</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in batting_data %}
+          <tr>
+            <td>{{ row.name }}</td>
+            <td>{{ row.C }}</td>
+            <td>{{ row["1B"] }}</td>
+            <td>{{ row["2B"] }}</td>
+            <td>{{ row["3B"] }}</td>
+            <td>{{ row.SS }}</td>
+            <td>{{ row.LF }}</td>
+            <td>{{ row.CF }}</td>
+            <td>{{ row.RF }}</td>
+            <td>{{ row.batting_avg }}</td>
+            <td>{{ row.obp }}</td>
+            <td>{{ row.slg }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  <br><br>
+    <h2>Pitching Stats</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>G</th>
+          <th>GS</th>
+          <th>IP</th>
+          <th>WHIP</th>
+          <th>K/9</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in pitching_data %}
+          <tr>
+            <td>{{ row.name }}</td>
+            <td>{{ row.games }}</td>
+            <td>{{ row.games_started }}</td>
+            <td>{{ row.innings_pitched }}</td>
+            <td>{{ row.whip }}</td>
+            <td>{{ row.strikeouts_per_nine }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+{% endblock %}
+
+
+
+
