@@ -1,3 +1,8 @@
+# file: add2022Data.py
+# authors: KayLynn Beard and Alex Kubicek
+#
+# inserts and updates database with 2022 data
+
 import pymysql
 import os
 import csi3335sp2023 as cfg
@@ -54,16 +59,14 @@ directory = "./CSVfiles"
 
 try:
     cur = con.cursor()
-
     # go through files
     for filename in os.listdir(directory):
         f = os.path.join(directory, filename)
         if os.path.isfile(f):
             table_name = (filename[9:].split(".")[0])
             table_name = table_name.lower()
-   # f = "./CSVfiles/5modifiedAppearances.csv"
-   # table_name = "appearances"
-            print("Inserting 2022 data for " + table_name + "...")
+
+            print("Inserting/updating 2022 data for " + table_name + "...")
 
             sql = "SELECT * FROM " + table_name
             cur.execute(sql)
@@ -123,7 +126,7 @@ try:
                         insert = True
 
                 if insert:
-                  #  print(insertSql, valuesList)
+                    # print(insertSql, valuesList)
                     cur.execute(insertSql, valuesList)
                 elif update:
                     updateSql = "UPDATE " + table_name + " SET "
@@ -146,7 +149,7 @@ try:
                             params.append(v)
                     updateSql = updateSql[:-2]
                     updateSql += " WHERE " + keyColumnName + " = '" + keyValue + "';"
-                   # print(updateSql, params)
+                    # print(updateSql, params)
                     cur.execute(updateSql, params)
 
 except Exception:
@@ -155,6 +158,6 @@ except Exception:
     raise
 else:
     con.commit()
-    print("2022 records successfully added to database!")
+    print("2022 records successfully updated/added to database!")
 finally:
     con.close()

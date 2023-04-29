@@ -2,8 +2,8 @@ park.key,park.alias,park.name,city,state,country
 ALB01,,Riverside Park,Albany,NY,US
 ALT01,,Columbia Park,Altoona,PA,US
 ANA01,Edison Field; Anaheim Stadium,Angel Stadium of Anaheim,Anaheim,CA,US
-ARL 1.00,,Arlington Stadium,Arlington,TX,US
-ARL 2.00,The Ballpark in Arlington; Ameriquest Fl,Rangers Ballpark in Arlington,Arlington,TX,US
+ARL01,,Arlington Stadium,Arlington,TX,US
+ARL02,The Ballpark in Arlington; Ameriquest Fl,Rangers Ballpark in Arlington,Arlington,TX,US
 ATL01,,Atlanta-Fulton County Stadium,Atlanta,GA,US
 ATL02,,Turner Field,Atlanta,GA,US
 ATL03,,Suntrust Park,Atlanta,GA,US
@@ -52,15 +52,15 @@ CIN06,League Park III,Palace of the Fans,Cincinnati,OH,US
 CIN07,Redland Field,Crosley Field,Cincinnati,OH,US
 CIN08,Riverfront Stadium,Cinergy Field,Cincinnati,OH,US
 CIN09,,Great American Ballpark,Cincinnati,OH,US
-CLE 1.00,,National Association Grounds,Cleveland,OH,US
-CLE 2.00,Kennard Street Park,League Park I,Cleveland,OH,US
-CLE 3.00,American Association Park,League Park II,Cleveland,OH,US
-CLE 4.00,Players League Park,Brotherhood Park,Cleveland,OH,US
-CLE 5.00,National League Park III,League Park III,Cleveland,OH,US
-CLE 6.00,Dunn Field,League Park IV,Cleveland,OH,US
-CLE 7.00,Municipal Stadium,Cleveland Stadium,Cleveland,OH,US
-CLE 8.00,Jacobs Field,Progressive Field,Cleveland,OH,US
-CLE 9.00,,Cedar Avenue Driving Park,Cleveland,OH,US
+CLE01,,National Association Grounds,Cleveland,OH,US
+CLE02,Kennard Street Park,League Park I,Cleveland,OH,US
+CLE03,American Association Park,League Park II,Cleveland,OH,US
+CLE04,Players League Park,Brotherhood Park,Cleveland,OH,US
+CLE05,National League Park III,League Park III,Cleveland,OH,US
+CLE06,Dunn Field,League Park IV,Cleveland,OH,US
+CLE07,Municipal Stadium,Cleveland Stadium,Cleveland,OH,US
+CLE08,Jacobs Field,Progressive Field,Cleveland,OH,US
+CLE09,,Cedar Avenue Driving Park,Cleveland,OH,US
 CLL01,,Euclid Beach Park,Collinwood,OH,US
 COL01,,Recreation Park I,Columbus,OH,US
 COL02,,Recreation Park II,Columbus,OH,US
@@ -134,7 +134,7 @@ MIN01,,Athletic Park,Minneapolis,MN,US
 MIN02,,Metropolitan Stadium,Bloomington,MN,US
 MIN03,,Hubert H. Humphrey Metrodome,Minneapolis,MN,US
 MIN04,,Target Field,Minneapolis,MN,US
-MNT 1.00,,Estadio Monterrey,Monterrey,Nuevo Leon,MX
+MNT01,,Estadio Monterrey,Monterrey,Nuevo Leon,MX
 MON01,Jarry Park,Parc Jarry,Montreal,QC,CA
 MON02,Olympic Stadium,Stade Olympique,Montreal,QC,CA
 NEW01,Brewster Park,Howard Avenue Grounds,New Haven,CT,US
@@ -164,7 +164,7 @@ NYC20,,Citi Field,New York,NY,US
 NYC21,,Yankee Stadium II,New York,NY,US
 OAK01,Network Associates Coliseum,Oakland-Alameda County Coliseum,Oakland,CA,US
 OMA01,,TD Ameritrade Park,Omaha,NE,US
-PEN 1.00,Pendleton Park,East End Park,Cincinnati,OH,US
+PEN01,Pendleton Park,East End Park,Cincinnati,OH,US
 PHI01,Athletics Park,Jefferson Street Grounds,Philadelphia,PA,US
 PHI02,,Centennial Park,Philadelphia,PA,US
 PHI03,,Oakdale Park,Philadelphia,PA,US
