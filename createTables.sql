@@ -1,3 +1,5 @@
+-- file: createTables.sql
+-- author: KayLynn Beard
 
 -- stores information about user
 CREATE TABLE users (
