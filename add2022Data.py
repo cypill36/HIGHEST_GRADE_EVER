@@ -3,19 +3,21 @@ import os
 import csi3335sp2023 as cfg
 
 
-def check_for_duplicate_primary_key(values, columns, table, cursor):
-    cursor.execute("SHOW keys FROM " + table_name + " WHERE key_name='PRIMARY';")
+def get_primary_key(table, cursor):
+    cursor.execute("SHOW keys FROM " + table + " WHERE key_name='PRIMARY';")
     results = cursor.fetchall()
     # no primary key in table (should be impossible but might as well check...)
     if cursor.rowcount == 0:
         return False
-    keyColumnName = results[0][4]
+    return results[0][4]
 
+def check_for_duplicate_primary_key(values, columns, table, cursor):
+    keyColumn = get_primary_key(table, cursor)
     # search for entry with matching primary key
-    findKeySql = "SELECT COUNT(*) FROM " + table + " WHERE " + keyColumnName + " = %s;";
+    findKeySql = "SELECT COUNT(*) FROM " + table + " WHERE " + keyColumn + " = %s;";
     keyValue = ""
-    for c, v in zip(column_names, values):
-        if c == keyColumnName:
+    for c, v in zip(columns, values):
+        if c == keyColumn:
             keyValue = v
     cursor.execute(findKeySql, keyValue)
     result = cursor.fetchall()
@@ -121,10 +123,31 @@ try:
                         insert = True
 
                 if insert:
-                 #   print(insertSql)
-                  #  print(valuesList)
+                  #  print(insertSql, valuesList)
                     cur.execute(insertSql, valuesList)
-
+                elif update:
+                    updateSql = "UPDATE " + table_name + " SET "
+                    keyColumnName = get_primary_key(table_name, cur)
+                    # remove primary key column and value from list of what to set
+                    keyValue = ""
+                    columnParams = []
+                    for c, v in zip(column_names, valuesList):
+                        if c == keyColumnName:
+                            keyValue = v
+                            valuesList.remove(v)
+                        else:
+                            columnParams.append(c)
+                    params = []
+                    for c, v in zip(columnParams, valuesList):
+                        if v is None:
+                            updateSql += c + " = NULL, "
+                        else:
+                            updateSql += c + " = %s, "
+                            params.append(v)
+                    updateSql = updateSql[:-2]
+                    updateSql += " WHERE " + keyColumnName + " = '" + keyValue + "';"
+                   # print(updateSql, params)
+                    cur.execute(updateSql, params)
 
 except Exception:
     con.rollback()
