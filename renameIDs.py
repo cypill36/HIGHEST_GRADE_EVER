@@ -28,7 +28,7 @@ try:
         if firstRow[0] == 'ID':
             uniqueID = t + "ID"
             # rename ID column to tableID
-            sql = "ALTER TABLE " + t + " CHANGE COLUMN `ID` `" + uniqueID + "` int(12);"
+            sql = "ALTER TABLE " + t + " RENAME COLUMN ID TO " + uniqueID + ";"
             cur.execute(sql)
 
 except Exception:
