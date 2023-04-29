@@ -6,6 +6,13 @@ Database Design and Application Final Project
 How to Access Website: ...
 
 
+How to Update Database to Match our Updated Database:
+```
+python renameIDs.py
+python add2022Data.py
+```
+
+
 Imported Python Modules:
 pymysql
 flask
