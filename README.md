@@ -12,7 +12,7 @@ How to Update Database to Match our Updated Database:
 ```
 \. createTables.sql
 python renameIDs.py
-python add2022Data.py (warning: this could a long time to run!)
+python add2022Data.py (warning: this could take a long time to run!)
 ```
 
 
