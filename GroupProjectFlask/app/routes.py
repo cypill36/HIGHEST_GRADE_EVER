@@ -1,6 +1,6 @@
 from flask import render_template, session, flash, get_flashed_messages, redirect, request, Flask, url_for
 from app import db, app
-from app.forms import LoginForm, RegistrationForm
+from app.forms import LoginForm, RegistrationForm, StatsForm
 from flask_login import current_user, login_user, logout_user
 from app.models import User
 from flask_login import login_required
@@ -38,11 +38,15 @@ def login():
 
 
 team_name = None
+global stats_form
+
 
 
 @app.route('/index/<teamName>', methods = ['GET', 'POST'])
 @login_required
-def index():
+def index(teamName=None):
+    global stats_form
+    stats_form = StatsForm()
     sql = '''SELECT DISTINCT(yearid)
              FROM teams
              WHERE team_name=%s
@@ -51,31 +55,33 @@ def index():
     cur = con.cursor()
     disabled = True
     if teamName is not None and teamName != 'None':
+        print('getting years for ' + teamName)
         cur.execute(sql, teamName)
         disabled = False
         results = cur.fetchall()
         for row in results:
             years.append(int(row[0]))
     teams = []
-    
     sql = ''' select distinct(team_name) from teams order by team_name ; '''
     cur.execute(sql)
     results = cur.fetchall()
     for x in results:
         teams.append(x[0])
     if not disabled:
-        form.yearchoices = [(index, year) for index, year in enumerate(years, start=1)]
+        print('setting year choices: ')
+        print(years)
+        stats_form.year.choices = [(index, year) for index, year in enumerate(years, start=1)]
     #sql = '''  select distinct(yearid) from teams where teamId = %s order be yearid ; '''
     #cur.execute(sql)
     #results2 = cur.fetchall()
     #for x in results2:
     #    years.append(x[0])
-    return render_template("index.html", title='Home Page',teams=teams, team_picked=disabled, team_name=teamName, form=form)
+    return render_template("index.html", title='Home Page',teams=teams, team_picked=disabled, team_name=teamName, form=stats_form)
 
 @app.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('index', teamName=None))
+    return redirect(url_for('login'))
    
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -96,10 +102,11 @@ def register():
 @app.route('/submit-form', methods=['POST'])
 @login_required
 def submit_form():
-    
+    global stats_form
     # Get user selected team and year and pass into the submit 
     chosenTeam = request.form['team']
-    chosenYear = request.form['year']
+    chosenYear = (stats_form.year.choices[ int(request.form['year']) - 1])[1]
+    print(str(chosenYear) + chosenTeam)
     #session[ 'chosenTeam' ] = request.form['team']
     #session[ 'chosenYear' ] = request.form['year']
 
@@ -179,7 +186,7 @@ def submit_form():
                 if row[0] == 'P':
                     pitchingStats[ playerID ][ 1 ] = row[1]
                     #del battingStats[ playerID ]
-                else:
+                elif row[0] in positionCounts.keys():
                     battingStats[ playerID ][ positionCounts[ row[0] ] ] = row[1]
 
             sql = '''SELECT b_H/b_AB, (b_H + b_BB + b_HBP)/(b_AB + b_BB + b_HBP + b_SF), 
