@@ -54,7 +54,7 @@ def index(teamName=None):
     years = []
     cur = con.cursor()
     disabled = True
-    if teamName is not None and teamName != 'None':
+    if teamName is not None and teamName != 'None' and teamName != ' ':
         # print('getting years for ' + teamName)
         cur.execute(sql, teamName)
         disabled = False
@@ -99,6 +99,12 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
+
+# @app.route('/index', methods=['GET', 'POST'])
+# def index():
+    # return redirect(url_for('index', teamName='None'))
+
+
 @app.route('/submit-form', methods=['POST'])
 @login_required
 def submit_form():
@@ -140,8 +146,16 @@ def submit_form():
                         FROM teams 
                         WHERE team_name = %s AND yearID = %s));'''
         
+        get_player_ids_sql = '''SELECT DISTINCT(playerid)
+                                FROM batting
+                                WHERE yearID = %s AND teamID = %s'''
+        cur.execute(get_player_ids_sql, [chosenYear, chosenTeamID])
+        ids = cur.fetchall()
+        playerIDs = []
+        for row in ids:
+            playerIDs.append(row[0])
 
-        #print( sql % ( chosenYear, chosenTeam, chosenYear ) )
+        # print( sql % ( chosenYear, chosenTeam, chosenYear ) )
 
         params = [ chosenYear, chosenTeam, chosenYear ]
         cur.execute(sql, params)
@@ -150,25 +164,34 @@ def submit_form():
         rosterList = []
         battingStats = {}
         pitchingStats = {}
-        playerIDs = []
         toDelete = []
 
-        for row in roster:
+        for player in playerIDs:
+            get_player_name_sql = '''SELECT CONCAT(nameFirst, ' ', nameLast)
+                                     FROM people
+                                     WHERE playerID=%s'''
+            cur.execute(get_player_name_sql, player)
+            results = cur.fetchone()
+            if len(results) != 0:
+                rosterList.append(results[0])
+                battingStats[player] = [results[0], 0, 0, 0, 0, 0, 0, 0, 0]
+                pitchingStats[player] = [results[0], 0, 0]
+        # for row in roster:
             # print(row)
-            for col in row:
-                if col is not None:
-                    rosterList.append(col)
+            # for col in row:
+                # if col is not None:
+                    # rosterList.append(col)
 
                     # getting playerid for each player
-                    sql = '''SELECT DISTINCT(playerid) 
-                             FROM people
-                             WHERE nameFirst = %s AND nameLast = %s'''
-                    cur.execute( sql, col.rsplit(' ', 1) )
-                    #print( col )
-                    playerID = cur.fetchall()[0][0]
+                    # sql = '''SELECT DISTINCT(playerid)
+                    #          FROM people
+                    #          WHERE nameFirst = %s AND nameLast = %s'''
+                    # cur.execute( sql, col.rsplit(' ', 1) )
+                    # print( col )
+                    # playerID = cur.fetchall()[0][0]
 
-                    battingStats[ playerID ] = [ col, 0, 0, 0, 0, 0, 0, 0, 0 ]
-                    pitchingStats[ playerID ] = [ col, 0, 0]
+                    # battingStats[ playerID ] = [ col, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                    # pitchingStats[ playerID ] = [ col, 0, 0]
 
         positionCounts = { 'C':1, '1B':2, '2B':3, '3B':4, 'SS':5, 'LF':6, 'CF':7, 'RF':8 }	
 
@@ -229,8 +252,9 @@ def submit_form():
             playerIDs.append( playerID )
         
         for playerID in playerIDs:
-            if pitchingStats[ playerID ][ 1 ] == 0:
-                del pitchingStats[ playerID ]
+            if playerID in pitchingStats.keys():
+                if pitchingStats[ playerID ][ 1 ] == 0:
+                    del pitchingStats[ playerID ]
 
         for playerID in toDelete:
             if playerID in battingStats.keys():
