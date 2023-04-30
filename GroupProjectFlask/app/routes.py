@@ -190,15 +190,11 @@ def submit_form():
                     pitchingStats[ playerID ][ 1 ] = row[1]
                     pitchingStats[ playerID][ 2 ] = (row[2])
 
-                    pitching_sql = '''SELECT FLOOR(SUM(p_IPOuts/3)) AS 'IP', 
-                                        SUM(p_H + p_BB)/(SUM(p_IPOuts/3)) AS WHIP,
+                    pitching_sql = '''SELECT FLOOR(SUM(IFNULL(p_IPOuts, 0)/3)) AS 'IP', 
+                                        SUM(IFNULL(p_H, 0) + IFNULL(p_BB, 0))/(SUM(IFNULL(p_IPOuts, 0)/3)) AS WHIP,
                                         (SUM(p_SO) * 9)/SUM(p_IPOuts/3) AS Kper9
                                       FROM pitching
                                       WHERE teamID=%s AND yearid=%s AND playerID=%s
-                                        AND p_H IS NOT NULL
-                                        AND p_IPOuts IS NOT NULL
-                                        AND p_BB IS NOT NULL
-                                        AND p_SO IS NOT NULL
                     '''
                     cur.execute(pitching_sql, [chosenTeamID, chosenYear, playerID])
                     results = cur.fetchone()
@@ -210,19 +206,13 @@ def submit_form():
                 elif row[0] in positionCounts.keys():
                     battingStats[ playerID ][ positionCounts[ row[0] ] ] = row[1]
 
-            sql = '''SELECT b_H/b_AB AS BA, (b_H + b_BB + b_HBP)/(b_AB + b_BB + b_HBP + b_SF) AS OBP, 
-            ((b_R - b_2B - b_3B - b_HR) + (2 * b_2B) + (3 * b_3B) + (4 * b_HR)) / b_AB AS SLG
+            sql = '''SELECT IFNULL(b_H, 0)/IFNULL(b_AB, 1) AS BA, (IFNULL(b_H, 0) + IFNULL(b_BB, 0) + IFNULL(b_HBP, 0))/
+                     (IFNULL(b_AB, 0) + IFNULL(b_BB, 0) + IFNULL(b_HBP, 0) + IFNULL(b_SF, 0)) AS OBP, 
+                     ((b_R - IFNULL(b_2B, 0) - IFNULL(b_3B, 0) - IFNULL(b_HR, 0)) + (2 * IFNULL(b_2B, 0)) + 
+                     (3 * IFNULL(b_3B, 0)) + (4 * IFNULL(b_HR, 0))) / IFNULL(b_AB, 1) AS SLG
                  FROM batting
                  WHERE playerid=%s AND yearId=%s AND teamID=%s
-                    AND b_H IS NOT NULL
-                    AND b_AB IS NOT NULL
-                    AND b_BB IS NOT NULL
-                    AND b_HBP IS NOT NULL
-                    AND b_SF IS NOT NULL
                     AND b_R IS NOT NULL
-                    AND b_2B IS NOT NULL
-                    AND b_3B IS NOT NULL
-                    AND b_HR IS NOT NULL
                  '''
 
             cur.execute( sql, [ playerID, chosenYear, chosenTeamID ] )
@@ -230,6 +220,7 @@ def submit_form():
             last3Stats = cur.fetchall()
 
             if len( last3Stats ) == 0:
+                print(playerID)
                 toDelete.append(playerID)
             for row in last3Stats:
                 for col in row:
@@ -240,8 +231,6 @@ def submit_form():
         for playerID in playerIDs:
             if pitchingStats[ playerID ][ 1 ] == 0:
                 del pitchingStats[ playerID ]
-            else:
-                del battingStats[ playerID ]
 
         for playerID in toDelete:
             if playerID in battingStats.keys():
