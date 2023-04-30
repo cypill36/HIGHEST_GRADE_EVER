@@ -37,14 +37,17 @@ def login():
     return render_template('login.html', title='Sign In', form=form)
 
 
-team_name = None
 global stats_form
 
+
+@app.route('/index/<first>/<second>', methods = ['GET'])
+def redirectToIndex(first, second):
+    return redirect(url_for('index', teamName=first + '?' + second))
 
 
 @app.route('/index/<teamName>', methods = ['GET', 'POST'])
 @login_required
-def index(teamName=None):
+def index(teamName):
     global stats_form
     stats_form = StatsForm()
     sql = '''SELECT DISTINCT(yearid)
@@ -55,6 +58,8 @@ def index(teamName=None):
     cur = con.cursor()
     disabled = True
     if teamName is not None and teamName != 'None' and teamName != ' ':
+        if '?' in teamName:
+            teamName = teamName.replace('?', '/')
         # print('getting years for ' + teamName)
         cur.execute(sql, teamName)
         disabled = False
@@ -67,6 +72,8 @@ def index(teamName=None):
     results = cur.fetchall()
     for x in results:
         teams.append(x[0])
+        if '/' in teams[-1]:
+            teams[-1].replace('/', '\\')
     if not disabled:
         # print('setting year choices: ')
         # print(years)
@@ -109,13 +116,18 @@ def register():
 @login_required
 def submit_form():
     global stats_form
+    if not stats_form.validate_on_submit():
+        return redirect(url_for('index', teamName='None'))
     # Get user selected team and year and pass into the submit 
     chosenTeam = request.form['team']
     chosenYear = (stats_form.year.choices[ int(request.form['year']) - 1])[1]
     # print(str(chosenYear) + chosenTeam)
     #session[ 'chosenTeam' ] = request.form['team']
     #session[ 'chosenYear' ] = request.form['year']
-
+    print(chosenTeam)
+    if chosenTeam is None or chosenTeam == 'None':
+        print("here")
+        redirect(url_for('index', teamName='None'))
     # Run query to get the roster
     roster = []
 
