@@ -65,14 +65,14 @@
         </tr>
       </thead>
       <tbody>
-        {% for row in pitching_data %}
+        {% for key in pitching_data.keys() %}
           <tr>
-            <td>{{ row.name }}</td>
-            <td>{{ row.games }}</td>
-            <td>{{ row.games_started }}</td>
-            <td>{{ row.innings_pitched }}</td>
-            <td>{{ row.whip }}</td>
-            <td>{{ row.strikeouts_per_nine }}</td>
+            <td>{{ pitching_data[key][0] }}</td>
+            <td>{{ pitching_data[key][1] }}</td>
+            <td>{{ pitching_data[key][2] }}</td>
+            <td>{{ pitching_data[key][3] }}</td>
+            <td>{{ pitching_data[key][4] }}</td>
+            <td>{{ pitching_data[key][5] }}</td>
           </tr>
         {% endfor %}
       </tbody>

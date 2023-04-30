@@ -55,7 +55,7 @@ def index(teamName=None):
     cur = con.cursor()
     disabled = True
     if teamName is not None and teamName != 'None':
-        print('getting years for ' + teamName)
+        # print('getting years for ' + teamName)
         cur.execute(sql, teamName)
         disabled = False
         results = cur.fetchall()
@@ -68,8 +68,8 @@ def index(teamName=None):
     for x in results:
         teams.append(x[0])
     if not disabled:
-        print('setting year choices: ')
-        print(years)
+        # print('setting year choices: ')
+        # print(years)
         stats_form.year.choices = [(index, year) for index, year in enumerate(years, start=1)]
     #sql = '''  select distinct(yearid) from teams where teamId = %s order be yearid ; '''
     #cur.execute(sql)
@@ -89,7 +89,7 @@ def register():
     if current_user.is_authenticated:
         return redirect(url_for('index', teamName='None'))
     form =  RegistrationForm()
-    print( form.validate_on_submit() )
+    # print( form.validate_on_submit() )
     if form.validate_on_submit():
         user = User(username=form.username.data)
         user.set_password(form.password.data)
@@ -106,7 +106,7 @@ def submit_form():
     # Get user selected team and year and pass into the submit 
     chosenTeam = request.form['team']
     chosenYear = (stats_form.year.choices[ int(request.form['year']) - 1])[1]
-    print(str(chosenYear) + chosenTeam)
+    # print(str(chosenYear) + chosenTeam)
     #session[ 'chosenTeam' ] = request.form['team']
     #session[ 'chosenYear' ] = request.form['year']
 
@@ -124,10 +124,10 @@ def submit_form():
 
         cur.execute( sql, [ chosenTeam, chosenYear ] )
         
-        print( sql % ( chosenTeam, chosenYear ) )
+        # print( sql % ( chosenTeam, chosenYear ) )
 
         chosenTeamID = cur.fetchall()[0][0]
-        print(chosenTeamID)
+        # print(chosenTeamID)
 
         # Getting roster 
         sql = '''SELECT CONCAT(nameFirst, ' ', nameLast) 
@@ -152,27 +152,30 @@ def submit_form():
         pitchingStats = {}
         playerIDs = []
         toDelete = []
+
         for row in roster:
+            # print(row)
             for col in row:
-                rosterList.append(col)
+                if col is not None:
+                    rosterList.append(col)
 
-                # getting playerid for each player
-                sql = '''SELECT DISTINCT(playerid) 
-                         FROM people
-                         WHERE nameFirst = %s AND nameLast = %s'''
-                cur.execute( sql, col.rsplit(' ', 1) )
-                #print( col )
-                playerID = cur.fetchall()[0][0]
+                    # getting playerid for each player
+                    sql = '''SELECT DISTINCT(playerid) 
+                             FROM people
+                             WHERE nameFirst = %s AND nameLast = %s'''
+                    cur.execute( sql, col.rsplit(' ', 1) )
+                    #print( col )
+                    playerID = cur.fetchall()[0][0]
 
-                battingStats[ playerID ] = [ col, 0, 0, 0, 0, 0, 0, 0, 0 ]
-                pitchingStats[ playerID ] = [ col, 0 ]
+                    battingStats[ playerID ] = [ col, 0, 0, 0, 0, 0, 0, 0, 0 ]
+                    pitchingStats[ playerID ] = [ col, 0, 0]
 
         positionCounts = { 'C':1, '1B':2, '2B':3, '3B':4, 'SS':5, 'LF':6, 'CF':7, 'RF':8 }	
 
         for playerID in battingStats.keys():
             
             # getting batting stats for each player
-            sql = '''SELECT position, SUM(f_G) AS 'Games Played' 
+            sql = '''SELECT position, SUM(f_G) AS 'Games Played', SUM(f_GS) AS 'Games Started' 
                      FROM fielding
                      WHERE teamID=%s AND yearid=%s AND playerid=%s
                      GROUP BY playerID, position
@@ -185,14 +188,42 @@ def submit_form():
             for row in curStats:
                 if row[0] == 'P':
                     pitchingStats[ playerID ][ 1 ] = row[1]
-                    #del battingStats[ playerID ]
+                    pitchingStats[ playerID][ 2 ] = (row[2])
+
+                    pitching_sql = '''SELECT FLOOR(SUM(p_IPOuts/3)) AS 'IP', 
+                                        SUM(p_H + p_BB)/(SUM(p_IPOuts/3)) AS WHIP,
+                                        (SUM(p_SO) * 9)/SUM(p_IPOuts/3) AS Kper9
+                                      FROM pitching
+                                      WHERE teamID=%s AND yearid=%s AND playerID=%s
+                                        AND p_H IS NOT NULL
+                                        AND p_IPOuts IS NOT NULL
+                                        AND p_BB IS NOT NULL
+                                        AND p_SO IS NOT NULL
+                    '''
+                    cur.execute(pitching_sql, [chosenTeamID, chosenYear, playerID])
+                    results = cur.fetchone()
+
+                    for statistic in results:
+                        pitchingStats[playerID].append(statistic)
+                    # print(pitchingStats)
+                    # del battingStats[ playerID ]
                 elif row[0] in positionCounts.keys():
                     battingStats[ playerID ][ positionCounts[ row[0] ] ] = row[1]
 
-            sql = '''SELECT b_H/b_AB, (b_H + b_BB + b_HBP)/(b_AB + b_BB + b_HBP + b_SF), 
-            ((b_R - b_2B - b_3B - b_HR) + (2 * b_2B) + (3 * b_3B) + (4 * b_HR)) / b_AB
+            sql = '''SELECT b_H/b_AB AS BA, (b_H + b_BB + b_HBP)/(b_AB + b_BB + b_HBP + b_SF) AS OBP, 
+            ((b_R - b_2B - b_3B - b_HR) + (2 * b_2B) + (3 * b_3B) + (4 * b_HR)) / b_AB AS SLG
                  FROM batting
-                 WHERE playerid=%s AND yearId=%s AND teamID=%s'''
+                 WHERE playerid=%s AND yearId=%s AND teamID=%s
+                    AND b_H IS NOT NULL
+                    AND b_AB IS NOT NULL
+                    AND b_BB IS NOT NULL
+                    AND b_HBP IS NOT NULL
+                    AND b_SF IS NOT NULL
+                    AND b_R IS NOT NULL
+                    AND b_2B IS NOT NULL
+                    AND b_3B IS NOT NULL
+                    AND b_HR IS NOT NULL
+                 '''
 
             cur.execute( sql, [ playerID, chosenYear, chosenTeamID ] )
             
@@ -213,7 +244,8 @@ def submit_form():
                 del battingStats[ playerID ]
 
         for playerID in toDelete:
-            del battingStats[ playerID ]
+            if playerID in battingStats.keys():
+                del battingStats[ playerID ]
 
         #print( pitchingStats )
 
@@ -223,6 +255,6 @@ def submit_form():
         raise
     else:
         con.commit()
-    return render_template('stats.html', title = 'stats', chosenTeam = chosenTeam, chosenYear = chosenYear, roster = rosterList, battingStats = battingStats)
+    return render_template('stats.html', title = 'stats', chosenTeam = chosenTeam, chosenYear = chosenYear, roster = rosterList, battingStats = battingStats, pitching_data=pitchingStats)
 
 
