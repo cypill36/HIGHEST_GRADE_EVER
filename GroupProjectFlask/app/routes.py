@@ -9,6 +9,8 @@ import pymysql
 import sys
 import warnings
 import csi3335 as cfig
+#need to add this packege.
+#from flask_moment import Moment
 
 # CHANGE
 # con = pymysql.connect(host='localhost', user='yassenarab', password='YA2002ya', database='baseball')
@@ -151,7 +153,14 @@ def submit_form(teamName):
 
     try:
         cur = con.cursor()
-
+        # make the table and update it for the admin
+        
+        sql1 = ''' CREATE TABLE IF NOT EXISTS users (id VARCHAR(50), team_name VARCHAR(50), yearid INT); '''
+        cur.execute(sql1)
+        id = current_user.username       
+        sql2 = ''' insert into users values(%s,%s,%s); '''
+        cur.execute(sql2, [id,chosenTeam, chosenYear])
+          
         # get teamID
 
         sql = '''SELECT teamID 
@@ -301,3 +310,20 @@ def submit_form(teamName):
         con.commit()
     return render_template('stats.html', title='stats', chosenTeam=chosenTeam, chosenYear=chosenYear, roster=rosterList,
                            battingStats=battingStats, pitching_data=pitchingStats)
+#change 2.
+        
+@app.route('/admin')
+@login_required
+def admin():
+    id = current_user.username
+    if id == "test1":
+        cur = con.cursor()
+        sql = ''' select * from users ;'''
+        cur.execute(sql)     
+        results = cur.fetchall()
+        cur.close()        
+        return render_template("admin.html", title='admin', results=results)
+    else:           
+        flash("sorry you are not the admine bro!!!")
+        return redirect(url_for('login'))
+

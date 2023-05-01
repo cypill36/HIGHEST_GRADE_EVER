@@ -7,6 +7,10 @@
 	<body>
 		<div>
 			<a href="{{ url_for('index', teamName='None') }}">Home</a>
+                         {% if current_user.username == "test1" %}
+                        <a href="{{ url_for('admin') }}">Admin</a>
+                        {% endif %}
+
 			{% if current_user.is_anonymous %}
 			<a href="{{ url_for('login') }}">Login</a>
 			{% else %}
