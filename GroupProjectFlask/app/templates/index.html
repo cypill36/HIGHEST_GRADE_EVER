@@ -2,7 +2,7 @@
 {% block content %}
 
      <br><br>
-     <form method="POST" action="{{ url_for('submit_form', teamName='None') }}">
+     <form method="POST" action="">
      <label for="team"> <b style="font-size: larger;">Team Name : </label>
      <select name="team" id="team-select" required onchange="window.location.href='/index/' + this.value"  style="font-size: 20px; height: 27px;">
      <option value="None">--Select a team--</option>

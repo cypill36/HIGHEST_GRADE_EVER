@@ -28,7 +28,7 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('Please use a different email address.')
 
 class StatsForm(FlaskForm):
-    year = SelectField('Year', choices=[], coerce=int)
+    year = SelectField('Year', choices=[], coerce=int, validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 
