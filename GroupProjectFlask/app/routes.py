@@ -47,6 +47,12 @@ def redirectToIndex(first, second):
     return redirect(url_for('index', teamName=first + '?' + second))
 
 
+@app.route('/submit-form/<first>/<second>', methods=['GET'])
+def redirectToSubmitForm(first, second):
+    print('hi')
+    return redirect(url_for('submit_form', teamName=first + '?' + second))
+
+
 global team_name, year_id
 
 
@@ -132,6 +138,8 @@ def submit_form(teamName):
     # return redirect(url_for('index', teamName='None'))
     # Get user selected team and year and pass into the submit
     chosenTeam = teamName
+    if '?' in chosenTeam:
+        chosenTeam = chosenTeam.replace('?', '/')
     chosenYear = stats_form.year.choices[stats_form.year.data - 1][1]
     print(str(chosenYear) + chosenTeam)
     # session[ 'chosenTeam' ] = request.form['team']
