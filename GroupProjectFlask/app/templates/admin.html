@@ -1,26 +1,29 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Admin Dashboard</h1>
+    <div style="max-width: 800px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 
+5px;">
+        <h1>Admin Dashboard</h1>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Username</th>
-                <th>Team Name</th>
-                <th>Year ID</th>
-            </tr>
-        </thead>
-        <tbody>
-            <h1><h1>
-            {% for row in results %}
+        <table style="margin-top: 20px; border-collapse: collapse; width: 100%;">
+            <thead style="background-color: #343a40; color: #fff;">
                 <tr>
-                    <td>{{ row[0] }}</td>
-                    <td>{{ row[1] }}</td>
-                    <td>{{ row[2] }}</td>
+                    <th>Username</th>
+                    <th>Team Name</th>
+                    <th>Year ID</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% for row in results %}
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: left;">{{ row[0] }}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: left;">{{ row[1] }}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px; text-align: left;">{{ row[2] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
 {% endblock %}
 

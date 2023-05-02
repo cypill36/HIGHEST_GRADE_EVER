@@ -25,7 +25,14 @@ def root():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    con = pymysql.connect(host=cfig.con['host'], user=cfig.con['user'], password=cfig.con['password'],
+                      database=cfig.con['database'])
     if current_user.is_authenticated:
+        cur = con.cursor()
+        # make the table and update it for the admin
+    
+        sql1 = ''' CREATE TABLE IF NOT EXISTS users (id VARCHAR(50), team_name VARCHAR(50), yearid INT); '''
+        cur.execute(sql1)
         return redirect(url_for('index', teamName='None'))
     form = LoginForm()
     if form.validate_on_submit():
@@ -61,6 +68,8 @@ global team_name, year_id
 @app.route('/index/<teamName>', methods=['GET', 'POST'])
 @login_required
 def index(teamName):
+    con = pymysql.connect(host=cfig.con['host'], user=cfig.con['user'], password=cfig.con['password'],
+                      database=cfig.con['database'])
     global stats_form
     stats_form = StatsForm()
 
@@ -135,6 +144,8 @@ def register():
 @app.route('/submit-form/<teamName>', methods=['GET', 'POST'])
 @login_required
 def submit_form(teamName):
+    con = pymysql.connect(host=cfig.con['host'], user=cfig.con['user'], password=cfig.con['password'],
+                      database=cfig.con['database'])
     global stats_form, team_name
     # if not stats_form.validate_on_submit():
     # return redirect(url_for('index', teamName='None'))
@@ -155,8 +166,6 @@ def submit_form(teamName):
         cur = con.cursor()
         # make the table and update it for the admin
         
-        sql1 = ''' CREATE TABLE IF NOT EXISTS users (id VARCHAR(50), team_name VARCHAR(50), yearid INT); '''
-        cur.execute(sql1)
         id = current_user.username       
         sql2 = ''' insert into users values(%s,%s,%s); '''
         cur.execute(sql2, [id,chosenTeam, chosenYear])
@@ -315,6 +324,8 @@ def submit_form(teamName):
 @app.route('/admin')
 @login_required
 def admin():
+    con = pymysql.connect(host=cfig.con['host'], user=cfig.con['user'], password=cfig.con['password'],
+                      database=cfig.con['database'])
     id = current_user.username
     if id == "test1":
         cur = con.cursor()
@@ -322,7 +333,7 @@ def admin():
         cur.execute(sql)     
         results = cur.fetchall()
         cur.close()        
-        return render_template("admin.html", title='admin', results=results)
+        return render_template("admin.html", title='Admin', results=results)
     else:           
         flash("sorry you are not the admine bro!!!")
         return redirect(url_for('login'))
