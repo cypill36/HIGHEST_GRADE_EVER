@@ -9,6 +9,13 @@ import pymysql
 import sys
 import warnings
 import csi3335 as cfig
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import KFold
+from sklearn.metrics import mean_squared_error
+
+
 #need to add this packege.
 #from flask_moment import Moment
 
@@ -204,7 +211,7 @@ def submit_form(teamName):
         for row in ids:
             playerIDs.append(row[0])
 
-        print(sql % (chosenYear, chosenTeam, chosenYear))
+        #print(sql % (chosenYear, chosenTeam, chosenYear))
 
         params = [chosenYear, chosenTeam, chosenYear]
         cur.execute(sql, params)
@@ -255,7 +262,7 @@ def submit_form(teamName):
             cur.execute(sql, [chosenTeamID, chosenYear, playerID])
             curStats = cur.fetchall()
 
-            print(sql % (chosenTeamID, chosenYear, playerID))
+            #print(sql % (chosenTeamID, chosenYear, playerID))
 
             for row in curStats:
                 if row[0] == 'P':
@@ -273,7 +280,7 @@ def submit_form(teamName):
 
                     for statistic in results:
                         pitchingStats[playerID].append(statistic)
-                    print(pitchingStats)
+                    #print(pitchingStats)
                     # del battingStats[ playerID ]
                 elif row[0] in positionCounts.keys():
                     battingStats[playerID][positionCounts[row[0]]] = row[1]
@@ -317,8 +324,103 @@ def submit_form(teamName):
         raise
     else:
         con.commit()
+
+    
+    # ---- Machine Learning Prediciont ---- #
+
+    team_stats = []
+    stat_names = [ 'yearID', 'team_H', 'team_BB', 'team_HBP', 
+                   'team_AB', 'team_SF', 'team_R', 'team_2B', 
+                   'team_3B', 'team_HR', 'team_IPouts', 'team_SO', 
+                   'team_W_Per' ]
+
+    try:
+        cur = con.cursor()
+        sql = '''SELECT yearID, team_H, team_BB, team_HBP, 
+                 team_AB, team_SF, team_R, team_2B, team_3B, 
+                 team_HR, team_IPouts, team_SO, team_W / team_G * 100 AS team_W_Per
+                 FROM teams 
+                 WHERE teamid = ANY( 
+                    SELECT DISTINCT(teamid) 
+                    FROM teams 
+                    WHERE yearid > 2020 ) 
+                 AND yearid >= 2000 AND team_name = %s
+                 ORDER BY teamid, yearID;'''
+
+        cur.execute( sql, [chosenTeam] )
+        stats = cur.fetchall()
+
+        for row in stats:
+            team_stat = []
+            for i in range( 0, len(row) ):
+                team_stat.append( row[i] )
+            team_stats.append( team_stat )
+
+    except Exception:
+        con.rollback()
+        print("Database Exception.")
+        raise
+    else:
+        con.commit()
+
+    if( len( team_stats ) == 0 ):
+         return render_template('stats.html', title='stats', chosenTeam=chosenTeam, chosenYear=chosenYear, roster=rosterList,
+                           battingStats=battingStats, pitching_data=pitchingStats, next_year='2022')
+
+    df = pd.DataFrame( team_stats, columns = stat_names )
+    df = df.drop( df[df.yearID == 2020].index )
+
+    OBP = ( df['team_H'] + df['team_BB'] + df['team_HBP'] ) / ( df['team_AB'] + df['team_BB'] + df['team_HBP'] + df['team_SF'] )
+    SLG = ( df['team_R'] - df['team_2B'] - df['team_3B'] - df['team_HR'] + 2*df['team_2B'] + 3*df['team_3B'] + 4*df['team_HR'] ) / df['team_AB']
+    WHIP = ( df['team_H'] + df['team_BB'] ) / ( df['team_IPouts']/3 )
+    Kper9 = ( df['team_SO'] / ( df['team_IPouts'] / 3 ) )
+
+    derivedDf = pd.DataFrame( { 'yearID' : df['yearID'], 'OBP' : OBP, 'SLG' : SLG, 'WHIP': WHIP, 'Kper9' : Kper9 } )
+
+    derivedDf['team_W_Per'] = df['team_W_Per']
+    
+    df = derivedDf
+
+    print(df)
+
+    features = ['OBP', 'SLG', 'WHIP', 'Kper9']
+    X = np.array( df[ features ] )
+    y = np.array( df[ 'team_W_Per' ] )
+
+    reg = LinearRegression().fit(X, y)
+
+    avg_stats = []
+    for name, data in derivedDf.iteritems():
+        if name != 'yearID' and name != 'team_W_Per':
+            avg_stats.append( derivedDf.loc[ df['yearID'] > 2017, name ].mean() )
+
+    prediction = reg.predict( np.array([avg_stats]) )
+
+    kf = KFold(n_splits=5)
+    RMSEs = []
+
+    for i, (train_index, test_index) in enumerate( kf.split(X) ):
+        X_train = X[train_index]
+        X_test = X[test_index]
+        y_train = y[train_index]
+        y_test = y[test_index]
+
+        model = LinearRegression()
+        model = model.fit( X_train, y_train )
+        y_pred = model.predict(X_test)
+        #y_pred = np.round(y_pred, 0)
+        mse = mean_squared_error( y_test, y_pred )
+
+        #print(np.concatenate((y_pred.reshape(len(y_pred),1), y_test.reshape(len(y_test),1)),1))
+
+        RMSEs.append( round(mse, 2) )
+
+
+    # ---- End Machine Learning Section --- #
+
+    
     return render_template('stats.html', title='stats', chosenTeam=chosenTeam, chosenYear=chosenYear, roster=rosterList,
-                           battingStats=battingStats, pitching_data=pitchingStats)
+                           battingStats=battingStats, pitching_data=pitchingStats, prediction=round(prediction[0], 2), RMSEs=RMSEs, next_year='2022')
 #change 2.
         
 @app.route('/admin')

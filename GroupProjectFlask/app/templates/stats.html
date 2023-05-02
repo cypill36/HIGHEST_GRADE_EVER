@@ -3,6 +3,17 @@
 {% block content %}
   <h1 style="text-align:center">Baseball Stats</h1>
   <br>
+  {% if prediction %}
+  <h2>Projected Win% for {{ next_year }} is {{ prediction }} </h2>
+  <h3>5-fold Cross Validation</h3>
+  {% for i in range( RMSEs|length ) %}
+  	CV sample {{ i+1 }} RMSE: {{ RMSEs[i] }} 
+	<br>
+  {% endfor %}
+  {% else %}
+  <h2>Team is not currently active; 2023 Win% will not be predicted</h2>
+  {% endif %}
+  <br>
   <h2>Roster for {{ chosenTeam }} in {{ chosenYear }}</h2>
     <table>
         <thead>
