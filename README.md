@@ -7,12 +7,15 @@ How to Access Website: ...
 ```
 ```
 
+Admin Login:
+
+
 
 How to Update Database to Match our Updated Database:
 ```
 \. createTables.sql
 python renameIDs.py
-python add2022Data.py (warning: this could take a long time to run!)
+python add2022Data.py (warning: this could take up to 10 minutes to run!)
 ```
 
 
@@ -22,18 +25,13 @@ flask
 ...
 
 What We Did:
-no thing 
-why are you asking? 
-are you from the fbi? 
-why do you care? 
-are you good bro ? 
-what is it that you want to know ????
 
 - Updated database with all new/updated 2022 data (add2022Data.py)
 - Renamed all ID attributes to a unique name (renameIDs.py)
 - Add user table and log table to database (createTables.sql)
+- Machine learning... (extra credit)
 
-from the website
+from the website...
 - Add user support to the database. This should include (at a minimum) a user name and encrypted password.
 - Create a web/database app that requires users to login into the system. Login information must be secure.
 - Once logged in, the user may provide a team name and a year. This should be input from a drop down menu requesting the team name, and then a drop down menu with the valid years. The system will log the selections made by a user.
