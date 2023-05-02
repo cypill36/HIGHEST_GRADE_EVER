@@ -390,7 +390,7 @@ def submit_form(teamName):
     reg = LinearRegression().fit(X, y)
 
     avg_stats = []
-    for name, data in derivedDf.iteritems():
+    for name in derivedDf.columns:
         if name != 'yearID' and name != 'team_W_Per':
             avg_stats.append( derivedDf.loc[ df['yearID'] > 2017, name ].mean() )
 
