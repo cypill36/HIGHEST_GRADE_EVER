@@ -458,6 +458,9 @@ def submit_form(teamName):
 def admin():
     con = pymysql.connect(host=cfig.con['host'], user=cfig.con['user'], password=cfig.con['password'],
                       database=cfig.con['database'])
+cur = con.cursor()
+sql1 = ''' CREATE TABLE IF NOT EXISTS users (id VARCHAR(50), team_name VARCHAR(50), yearid INT); '''
+cur.execute(sql1)
     id = current_user.username
     if id == "test1":
         cur = con.cursor()
