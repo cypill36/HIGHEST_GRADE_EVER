@@ -185,7 +185,7 @@ def submit_form(teamName):
 
         # print( sql % ( chosenTeam, chosenYear ) )
 
-        chosenTeamID = cur.fetchall()
+        chosenTeamID = cur.fetchall()[0][0]
         # print(chosenTeamID)
         # print(chosenTeamID)
 
@@ -200,6 +200,8 @@ def submit_form(teamName):
                                         FROM fielding
                                     )
         '''
+
+        # print(get_player_ids_sql % (chosenYear, chosenTeamID))
         cur.execute(get_player_ids_sql, [chosenYear, chosenTeamID])
         ids = cur.fetchall()
         playerIDs = []
