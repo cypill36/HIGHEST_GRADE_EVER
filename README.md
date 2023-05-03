@@ -68,4 +68,4 @@ password: Baylor123
 ## How to Run the Web Application
 1. Navigate to the subdirectory `GroupProjectFlask/`
 2. Run `flask run`
-2. Access the web app at `http://localhost:/`
+2. Access the web app at `http://localhost:/` ----------------------------
