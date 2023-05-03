@@ -222,7 +222,7 @@ def submit_form(teamName):
 
         for player in playerIDs:
 
-            get_player_name_sql = '''SELECT CONCAT(nameFirst, ' ', nameLast)
+            get_player_name_sql = '''SELECT CONCAT(IFNULL(nameFirst, ''), ' ', IFNULL(nameLast, ''))
                                      FROM people
                                      WHERE playerID=%s'''
             cur.execute(get_player_name_sql, player)
@@ -235,7 +235,7 @@ def submit_form(teamName):
         positionCounts = {'C': 2, '1B': 3, '2B': 4, '3B': 5, 'SS': 6, 'LF': 7, 'CF': 8, 'RF': 9}
 
         for playerID in battingStats.keys():
-            get_total_games_sql = '''SELECT SUM(f_G) FROM fielding WHERE teamid=%s AND yearid=%s AND playerid=%s
+            get_total_games_sql = '''SELECT SUM(IFNULL(f_G, 0)) FROM fielding WHERE teamid=%s AND yearid=%s AND playerid=%s
                                      GROUP BY teamid, yearid, playerid
             '''
             if playerID in DHs:
@@ -252,7 +252,7 @@ def submit_form(teamName):
             if playerID in DHs:
                 battingStats[playerID][10] = games
             # getting batting stats for each player
-            sql = '''SELECT position, SUM(f_G) AS 'Games Played', SUM(f_GS) AS 'Games Started' 
+            sql = '''SELECT position, SUM(IFNULL(f_G, 0)) AS 'Games Played', SUM(IFNULL(f_GS, 0)) AS 'Games Started' 
                      FROM fielding
                      WHERE teamID=%s AND yearid=%s AND playerid=%s
                      GROUP BY playerID, position
