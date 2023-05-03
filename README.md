@@ -66,5 +66,6 @@ password: Baylor123
 2. Run ```python add2022Data.py``` to update the database. (Warning: this can take about 5 minutes to run!)
 
 ## How to Run the Web Application
-1. ```flask run```  ---------------------------------------------
-2. Access it at `http://localhost:????/` --------------------------------------
+1. Navigate to the subdirectory `GroupProjectFlask/`
+2. Run `flask run`
+2. Access the web app at `http://localhost:/`
