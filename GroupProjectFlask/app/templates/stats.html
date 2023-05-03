@@ -1,99 +1,100 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1 style="text-align:center">Baseball Stats</h1>
-  <br>
-  {% if prediction %}
-  <h2>Projected Win % for {{ curr_year }} is {{ prediction }}% based on past 20 years</h2>
-  <h2>Actual Win % for {{ curr_year }} is {{ actual }}%</h2>
-  {% else %}
-  <h2>Team has not been active for at least 20 years before {{ curr_year }}; insufficient data to make a prediction</h2>
-  {% endif %}
-  <br>
-  <h2>Roster for {{ chosenTeam }} in {{ chosenYear }}</h2>
+  <div style="text-align:center;">
+    <h1>Baseball Stats</h1>
+    <br>
+    {% if message %}
+      <h2>Insufficient data in this time period to calculate the Win %</h2>
+    {% elif prediction %}
+      <h2>Projected Win % for {{ curr_year }} is {{ prediction }}% based on past 20 years</h2>
+      <h2>Actual Win % for {{ curr_year }} is {{ actual }}%</h2>
+    {% else %}
+      <h2>Team has not been active/has insufficient data for at least 20 years before {{ curr_year }}</h2>
+    {% endif %}
+    <br>
+    <h2>Roster for {{ chosenTeam }} in {{ chosenYear }}</h2>
+
     <table>
         <thead>
-	 <tr>
 	  {% for player in roster %}
 	      {{ player }}{% if not loop.last %}, {% endif %}&nbsp
 	  {% endfor %}
 	 </tr>
 	</thead>
     </table>  
-  <br>
-    <h2>Batting Stats</h2>
-    <table>
+
+
+      <h2>Batting Stats</h2>
+    <table style="border-collapse: collapse; width: 100%;">
       <thead>
-        <tr>
-          <th>Name</th>
-          <th>G</th>
-          <th>C</th>
-          <th>1B</th>
-          <th>2B</th>
-          <th>3B</th>
-          <th>SS</th>
-          <th>LF</th>
-          <th>CF</th>
-          <th>RF</th>
-          <th>DH</th>
-          <th>BB</th>
-          <th>BA</th>
-          <th>OBP</th>
-          <th>SLG</th>
+        <tr style="background-color: #63c5da;">
+          <th style="border: 1px solid #000; padding: 5px;"> Name</th>
+          <th style="border: 1px solid #000; padding: 5px;"> G </th>
+          <th style="border: 1px solid #000; padding: 5px;"> C </th>
+          <th style="border: 1px solid #000; padding: 5px;"> 1B </th>
+          <th style="border: 1px solid #000; padding: 5px;"> 2B </th>
+          <th style="border: 1px solid #000; padding: 5px;"> 3B </th>
+          <th style="border: 1px solid #000; padding: 5px;"> SS </th>
+          <th style="border: 1px solid #000; padding: 5px;"> LF </th>
+          <th style="border: 1px solid #000; padding: 5px;"> CF </th>
+          <th style="border: 1px solid #000; padding: 5px;"> RF </th>
+          <th style="border: 1px solid #000; padding: 5px;"> DH </th>
+          <th style="border: 1px solid #000; padding: 5px;"> BB </th>
+          <th style="border: 1px solid #000; padding: 5px;"> BA </th>
+          <th style="border: 1px solid #000; padding: 5px;"> OBP </th>
+          <th style="border: 1px solid #000; padding: 5px;"> SLG </th>
         </tr>
       </thead>
       <tbody>
         {% for key in battingStats %}
           <tr>
-            <td>{{ battingStats[key][0] }}</td>
-            <td>{{ battingStats[key][1] }}</td>
-            <td>{{ battingStats[key][2] }}</td>
-            <td>{{ battingStats[key][3] }}</td>
-            <td>{{ battingStats[key][4] }}</td>
-            <td>{{ battingStats[key][5] }}</td>
-            <td>{{ battingStats[key][6] }}</td>
-            <td>{{ battingStats[key][7] }}</td>
-            <td>{{ battingStats[key][8] }}</td>
-            <td>{{ battingStats[key][9] }}</td>
-            <td>{{ battingStats[key][10] }}</td>
-            <td>{{ battingStats[key][12] }}</td>
-            <td>{{ battingStats[key][11] }}</td>
-            <td>{{ battingStats[key][13] }}</td>
-            <td>{{ battingStats[key][14] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ battingStats[key][0] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ battingStats[key][1] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ battingStats[key][2] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ battingStats[key][3] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ battingStats[key][4] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ battingStats[key][5] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ battingStats[key][6] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ battingStats[key][7] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ battingStats[key][8] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ battingStats[key][9] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ battingStats[key][10] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ battingStats[key][12] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ battingStats[key][11] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ battingStats[key][13] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ battingStats[key][14] }}</td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
-  <br><br>
+    <br><br>
     <h2>Pitching Stats</h2>
-    <table>
+    <table style="border-collapse: collapse; width: 100%;">
       <thead>
-        <tr>
-          <th>Name</th>
-          <th>G</th>
-          <th>GS</th>
-          <th>IP</th>
-          <th>WHIP</th>
-          <th>K/9</th>
-          <th>BB</th>
+        <tr style="background-color: #63c5da;">
+          <th style="border: 1px solid #000; padding: 5px;">Name</th>
+          <th style="border: 1px solid #000; padding: 5px;">G</th>
+          <th style="border: 1px solid #000; padding: 5px;">GS</th>
+          <th style="border: 1px solid #000; padding: 5px;">IP</th>
+          <th style="border: 1px solid #000; padding: 5px;">WHIP</th>
+          <th style="border: 1px solid #000; padding: 5px;">K/9</th>
+          <th style="border: 1px solid #000; padding: 5px;">BB</th>
         </tr>
       </thead>
       <tbody>
         {% for key in pitching_data.keys() %}
           <tr>
-            <td>{{ pitching_data[key][0] }}</td>
-            <td>{{ pitching_data[key][1] }}</td>
-            <td>{{ pitching_data[key][2] }}</td>
-            <td>{{ pitching_data[key][3] }}</td>
-            <td>{{ pitching_data[key][4] }}</td>
-            <td>{{ pitching_data[key][5] }}</td>
-            <td>{{ pitching_data[key][6] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ pitching_data[key][0] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ pitching_data[key][1] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ pitching_data[key][2] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ pitching_data[key][3] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ pitching_data[key][4] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ pitching_data[key][5] }}</td>
+            <td style="border: 1px solid #000; padding: 5px;">{{ pitching_data[key][6] }}</td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
 {% endblock %}
-
-
-
 
