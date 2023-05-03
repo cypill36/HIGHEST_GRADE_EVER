@@ -1,40 +1,72 @@
-# Team: Highest Grade Ever
-Members: Yaseen Arab, Alex Kubicek, Kaylynn Beard, Cyril Pillai
+# HighestGradeEver Baseball Application
+CSI 3335 Database Design and Application Final Project
 
-Database Design and Application Final Project
+### Members:
+- Yaseen Arab
+- Alex Kubicek
+- KayLynn Beard
+- Cyril Pillai
 
-How to Access Website: ...
+Admin Login Information:
 ```
-```
-
-Admin Login:
-
-
-
-How to Update Database to Match our Updated Database:
-```
-\. createTables.sql
-python renameIDs.py
-python add2022Data.py (warning: this could take up to 10 minutes to run!)
+username: test1
+password: Baylor123
 ```
 
-
-Imported Python Modules:
-pymysql
-flask
-...
-
-What We Did:
-
-- Updated database with all new/updated 2022 data (add2022Data.py)
+## Updates to the Database
 - Renamed all ID attributes to a unique name (renameIDs.py)
-- Add user table and log table to database (createTables.sql)
-- Machine learning... (extra credit)
+- Updated the database with all new/updated 2022 data (add2022Data.py)
+  - Includes new data with yearID=2022
+  - Includes updating rows already in the database with values that have changed in 2022 (ex: death dates, changed names, etc.)
+  - The following tables are entirely up-to-date:
+    - Franchises
+    - People, Managers
+    - Teams
+    - Parks
+    - Allstarfull
+    - Appearances
+    - Batting, BattingPost
+    - Pitching, PitchingPost
+    - Fielding, FieldingPost
+    - HomeGames
+    - SeriesPost
+- User table and log table added to database (createTables.sql)
 
-from the website...
-- Add user support to the database. This should include (at a minimum) a user name and encrypted password.
-- Create a web/database app that requires users to login into the system. Login information must be secure.
-- Once logged in, the user may provide a team name and a year. This should be input from a drop down menu requesting the team name, and then a drop down menu with the valid years. The system will log the selections made by a user.
-- Write a web page to display the roster for the team submitted. Batting and pitching statistics should be separate. For each batter, include the number of games played at each position and his ''slash line,'' consisiting of his batting average, on base percentage and slugging percentage. For each pitcher, include the number of games pitched, the number of games started, the innings pitched (not IPOuts), the WHIP and the strikeouts per 9 innings.
-- Have an admin user (password should be included in your readme file). The admin user can see the logged information for each user and the total requests for all users.
 
+## Web Features
+- User login/signup with username and encrypted password
+- Admin login can view users, user logs, and user total requests
+- Select team name and year from drop down menu to view...
+  - player roster
+  - each player's batting statistics
+  - each player's pitching statistics
+- Linear regression to predict % wins for current year based on data from last 20 years (OB %, slug %, whip %, .....) ---------------------------------
+  - if insufficient data (ex: no SF calculated for the year), prediction is omitted
+  - if team has not been active for the past 20 years, predicted is omitted
+  - result is compared to actual % wins
+  
+## Installation
+1. Create a new database called ```highestgradeever``` and run ```\. highestgradeever``` to initialize the updated database.
+2. Update ```csi3335sp2023.py``` to contain your username and password.
+3. Install all required python modules listed below into your virtual environment.
+
+### Imported Python Modules:
+- flask
+- flask_sqlalchemy
+- flask_login
+- pymysql
+- pandas
+- numpy
+- werkzeug
+- flask-wtf
+- flask-migrate
+- sklearn
+- ... (these are all that are listed on the website, remove what we didn't use) ----------------------------------------------------------------
+
+## How to Update the Database
+1. Run ```python renameIDs.py``` to rename ID attributes.
+2. Run ```python add2022Data.py``` to update the database. (Warning: this can take about 5 minutes to run!)
+
+## How to Run the Web Application
+1. ```flask run```  ---------------------------------------------
+2. Access it at `http://localhost:????/` ----------------------------------------------------
