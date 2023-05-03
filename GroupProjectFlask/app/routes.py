@@ -440,7 +440,8 @@ def submit_form(teamName):
     
     return render_template('stats.html', title='Stats', chosenTeam=chosenTeam, chosenYear=chosenYear, roster=rosterList,
                            battingStats=battingStats, pitching_data=pitchingStats, prediction=round(prediction[0], 2),
-                           actual=currTeam['team_W_Per'], curr_year=chosenYear)
+                           actual=round(currTeam['team_W_Per'],2), curr_year=chosenYear)
+
 #change 2.
         
 @app.route('/admin')
