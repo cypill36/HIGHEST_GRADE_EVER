@@ -19,8 +19,6 @@ from sklearn.metrics import mean_squared_error
 #need to add this packege.
 #from flask_moment import Moment
 
-# CHANGE
-# con = pymysql.connect(host='localhost', user='yassenarab', password='YA2002ya', database='baseball')
 con = pymysql.connect(host=cfig.con['host'], user=cfig.con['user'], password=cfig.con['password'],
                       database=cfig.con['database'])
 
@@ -222,7 +220,7 @@ def submit_form(teamName):
 
         for player in playerIDs:
 
-            get_player_name_sql = '''SELECT CONCAT(IFNULL(nameFirst, ''), ' ', IFNULL(nameLast, ''))
+            get_player_name_sql = '''SELECT CONCAT(nameFirst, ' ', nameLast)
                                      FROM people
                                      WHERE playerID=%s'''
             cur.execute(get_player_name_sql, player)
@@ -235,7 +233,7 @@ def submit_form(teamName):
         positionCounts = {'C': 2, '1B': 3, '2B': 4, '3B': 5, 'SS': 6, 'LF': 7, 'CF': 8, 'RF': 9}
 
         for playerID in battingStats.keys():
-            get_total_games_sql = '''SELECT SUM(IFNULL(f_G, 0)) FROM fielding WHERE teamid=%s AND yearid=%s AND playerid=%s
+            get_total_games_sql = '''SELECT SUM(f_G) FROM fielding WHERE teamid=%s AND yearid=%s AND playerid=%s
                                      GROUP BY teamid, yearid, playerid
             '''
             if playerID in DHs:
@@ -252,7 +250,7 @@ def submit_form(teamName):
             if playerID in DHs:
                 battingStats[playerID][10] = games
             # getting batting stats for each player
-            sql = '''SELECT position, SUM(IFNULL(f_G, 0)) AS 'Games Played', SUM(IFNULL(f_GS, 0)) AS 'Games Started' 
+            sql = '''SELECT position, SUM(f_G) AS 'Games Played', SUM(f_GS) AS 'Games Started' 
                      FROM fielding
                      WHERE teamID=%s AND yearid=%s AND playerid=%s
                      GROUP BY playerID, position
@@ -378,14 +376,15 @@ def submit_form(teamName):
         con.commit()
 
     if( len( team_stats ) < 20 ):
-         return render_template('stats.html', title='stats', chosenTeam=chosenTeam, chosenYear=chosenYear, roster=rosterList,
+         return render_template('stats.html', title='Stats', chosenTeam=chosenTeam, chosenYear=chosenYear, roster=rosterList,
                            battingStats=battingStats, pitching_data=pitchingStats, curr_year=chosenYear)
-
+	
     df = pd.DataFrame( team_stats, columns = stat_names )
-
+    print(df)
+    print()
 
     OBP = ( df['team_H'] + df['team_BB'] + df['team_HBP'] ) / ( df['team_AB'] + df['team_BB'] + df['team_HBP'] + df['team_SF'] )
-    SLG = ( df['team_R'] - df['team_2B'] - df['team_3B'] - df['team_HR'] + 2*df['team_2B'] + 3*df['team_3B'] + 4*df['team_HR'] ) / df['team_AB']
+    SLG = ( df['team_H'] - df['team_2B'] - df['team_3B'] - df['team_HR'] + 2*df['team_2B'] + 3*df['team_3B'] + 4*df['team_HR'] ) / df['team_AB']
     WHIP = ( df['team_H'] + df['team_BBA'] ) / ( df['team_IPouts']/3 )
     Kper9 = ( df['team_SO'] / ( df['team_IPouts'] / 3 ) )
 
@@ -394,6 +393,7 @@ def submit_form(teamName):
     derivedDf['team_W_Per'] = df['team_W_Per']
     
     df = derivedDf
+    print(df)
     currTeam = df.iloc[-1]
     df = df.iloc[:-1 , :]
     df = df.dropna().reset_index(drop=True)
@@ -405,8 +405,13 @@ def submit_form(teamName):
 
 
     currTeamStats = [ currTeam['OBP'], currTeam['SLG'], currTeam['WHIP'], currTeam['Kper9'] ]
-    reg = LinearRegression().fit(X, y)
-    prediction = reg.predict( np.array( [currTeamStats] ))
+    try:
+    	reg = LinearRegression().fit(X, y)
+    	prediction = reg.predict( np.array( [currTeamStats] ))
+    except Exception:
+    	return render_template('stats.html', title='Stats', chosenTeam=chosenTeam, chosenYear=chosenYear, roster=rosterList,
+			       battingStats=battingStats, pitching_data=pitchingStats, message="none found" ) 
+			       
 
     kf = KFold(n_splits=5)
     RMSEs = []
@@ -433,7 +438,7 @@ def submit_form(teamName):
     # ---- End Machine Learning Section --- #
 
     
-    return render_template('stats.html', title='stats', chosenTeam=chosenTeam, chosenYear=chosenYear, roster=rosterList,
+    return render_template('stats.html', title='Stats', chosenTeam=chosenTeam, chosenYear=chosenYear, roster=rosterList,
                            battingStats=battingStats, pitching_data=pitchingStats, prediction=round(prediction[0], 2),
                            actual=currTeam['team_W_Per'], curr_year=chosenYear)
 #change 2.
