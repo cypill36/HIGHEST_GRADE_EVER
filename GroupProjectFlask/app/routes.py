@@ -191,31 +191,29 @@ def submit_form(teamName):
         # print(chosenTeamID)
         # print(chosenTeamID)
 
-        # Getting roster 
-        sql = '''SELECT CONCAT(nameFirst, ' ', nameLast) 
-                 FROM people 
-                 WHERE playerid IN (
-                    SELECT DISTINCT(playerid) 
-                    FROM batting 
-                    WHERE yearID = %s AND teamID = (
-                        SELECT DISTINCT(teamid) 
-                        FROM teams 
-                        WHERE team_name = %s AND yearID = %s));'''
-
         get_player_ids_sql = '''SELECT DISTINCT(playerid)
                                 FROM batting
                                 WHERE yearID = %s AND teamID = %s'''
+        get_dh_ids_sql = '''SELECT DISTINCT(playerid)
+                                 FROM batting
+                                 WHERE yearid = %s AND teamid = %s
+                                    AND playerid NOT IN (
+                                        SELECT DISTINCT(playerid)
+                                        FROM fielding
+                                    )
+        '''
         cur.execute(get_player_ids_sql, [chosenYear, chosenTeamID])
         ids = cur.fetchall()
         playerIDs = []
         for row in ids:
             playerIDs.append(row[0])
 
-        #print(sql % (chosenYear, chosenTeam, chosenYear))
-
-        params = [chosenYear, chosenTeam, chosenYear]
-        cur.execute(sql, params)
-        roster = cur.fetchall()
+        cur.execute(get_dh_ids_sql, [chosenYear, chosenTeamID])
+        DHs = []
+        results = cur.fetchall()
+        for dh_id in results:
+            DHs.append(dh_id[0])
+        # print(sql % (chosenYear, chosenTeam, chosenYear))
 
         rosterList = []
         battingStats = {}
@@ -223,6 +221,7 @@ def submit_form(teamName):
         toDelete = []
 
         for player in playerIDs:
+
             get_player_name_sql = '''SELECT CONCAT(nameFirst, ' ', nameLast)
                                      FROM people
                                      WHERE playerID=%s'''
@@ -230,29 +229,28 @@ def submit_form(teamName):
             results = cur.fetchone()
             if len(results) != 0:
                 rosterList.append(results[0])
-                battingStats[player] = [results[0], 0, 0, 0, 0, 0, 0, 0, 0]
+                battingStats[player] = [results[0], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
                 pitchingStats[player] = [results[0], 0, 0]
-        # for row in roster:
-        # print(row)
-        # for col in row:
-        # if col is not None:
-        # rosterList.append(col)
 
-        # getting playerid for each player
-        # sql = '''SELECT DISTINCT(playerid)
-        #          FROM people
-        #          WHERE nameFirst = %s AND nameLast = %s'''
-        # cur.execute( sql, col.rsplit(' ', 1) )
-        # print( col )
-        # playerID = cur.fetchall()[0][0]
-
-        # battingStats[ playerID ] = [ col, 0, 0, 0, 0, 0, 0, 0, 0 ]
-        # pitchingStats[ playerID ] = [ col, 0, 0]
-
-        positionCounts = {'C': 1, '1B': 2, '2B': 3, '3B': 4, 'SS': 5, 'LF': 6, 'CF': 7, 'RF': 8}
+        positionCounts = {'C': 2, '1B': 3, '2B': 4, '3B': 5, 'SS': 6, 'LF': 7, 'CF': 8, 'RF': 9}
 
         for playerID in battingStats.keys():
+            get_total_games_sql = '''SELECT SUM(f_G) FROM fielding WHERE teamid=%s AND yearid=%s AND playerid=%s
+                                     GROUP BY teamid, yearid, playerid
+            '''
+            if playerID in DHs:
+                get_total_games_sql.replace('f_G', 'b_G')
+                get_total_games_sql.replace('fielding', 'batting')
 
+            cur.execute(get_total_games_sql, [chosenTeamID, chosenYear, playerID])
+            games = cur.fetchall()
+            if len(games) > 0:
+                games = games[0][0]
+            else:
+                games = 0
+            battingStats[playerID][1] = games
+            if playerID in DHs:
+                battingStats[playerID][10] = games
             # getting batting stats for each player
             sql = '''SELECT position, SUM(f_G) AS 'Games Played', SUM(f_GS) AS 'Games Started' 
                      FROM fielding
@@ -271,7 +269,8 @@ def submit_form(teamName):
 
                     pitching_sql = '''SELECT FLOOR(SUM(IFNULL(p_IPOuts, 0)/3)) AS 'IP', 
                                         SUM(IFNULL(p_H, 0) + IFNULL(p_BB, 0))/(SUM(IFNULL(p_IPOuts, 0)/3)) AS WHIP,
-                                        (SUM(p_SO) * 9)/SUM(p_IPOuts/3) AS Kper9
+                                        (SUM(IFNULL(p_SO, 0)) * 9)/SUM(IFNULL(p_IPOuts, 0)/3) AS Kper9,
+                                        SUM(IFNULL(p_BB, 0)) AS BB
                                       FROM pitching
                                       WHERE teamID=%s AND yearid=%s AND playerID=%s
                     '''
@@ -286,6 +285,8 @@ def submit_form(teamName):
                     battingStats[playerID][positionCounts[row[0]]] = row[1]
 
             sql = '''SELECT SUM(IFNULL(b_H, 0))/SUM(IFNULL(b_AB, 0)) AS BA, 
+            
+                     SUM(IFNULL(b_BB, 0)) AS BB,
             
                      SUM((IFNULL(b_H, 0) + IFNULL(b_BB, 0) + IFNULL(b_HBP, 0)))/
                      SUM((IFNULL(b_AB, 0) + IFNULL(b_BB, 0) + IFNULL(b_HBP, 0) + IFNULL(b_SF, 0))) AS OBP, 
@@ -307,13 +308,18 @@ def submit_form(teamName):
             for row in last3Stats:
                 for col in row:
                     battingStats[playerID].append(col)
+
+            i = 0
             delete_player = True
             for stat in battingStats[playerID]:
-                if not delete_player or not str(stat).isnumeric():
+                if not delete_player or not str(stat).isnumeric() or i < 2:
+                    i += 1
                     continue
                 if stat != 0 and stat is not None:
                     # print(playerID + ' ' + str(stat))
                     delete_player = False
+
+
             if delete_player and playerID not in toDelete:
                 toDelete.append(playerID)
             playerIDs.append(playerID)

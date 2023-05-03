@@ -26,6 +26,7 @@
       <thead>
         <tr>
           <th>Name</th>
+          <th>G</th>
           <th>C</th>
           <th>1B</th>
           <th>2B</th>
@@ -34,6 +35,8 @@
           <th>LF</th>
           <th>CF</th>
           <th>RF</th>
+          <th>DH</th>
+          <th>BB</th>
           <th>BA</th>
           <th>OBP</th>
           <th>SLG</th>
@@ -53,7 +56,10 @@
             <td>{{ battingStats[key][8] }}</td>
             <td>{{ battingStats[key][9] }}</td>
             <td>{{ battingStats[key][10] }}</td>
+            <td>{{ battingStats[key][12] }}</td>
             <td>{{ battingStats[key][11] }}</td>
+            <td>{{ battingStats[key][13] }}</td>
+            <td>{{ battingStats[key][14] }}</td>
           </tr>
         {% endfor %}
       </tbody>
@@ -69,6 +75,7 @@
           <th>IP</th>
           <th>WHIP</th>
           <th>K/9</th>
+          <th>BB</th>
         </tr>
       </thead>
       <tbody>
@@ -80,6 +87,7 @@
             <td>{{ pitching_data[key][3] }}</td>
             <td>{{ pitching_data[key][4] }}</td>
             <td>{{ pitching_data[key][5] }}</td>
+            <td>{{ pitching_data[key][6] }}</td>
           </tr>
         {% endfor %}
       </tbody>
