@@ -36,10 +36,7 @@ def login():
                       database=cfig.con['database'])
     if current_user.is_authenticated:
         cur = con.cursor()
-        # make the table and update it for the admin
-    
-        sql1 = ''' CREATE TABLE IF NOT EXISTS users (id VARCHAR(50), team_name VARCHAR(50), yearid INT); '''
-        cur.execute(sql1)
+      
         return redirect(url_for('index', teamName='None'))
     form = LoginForm()
     if form.validate_on_submit():
