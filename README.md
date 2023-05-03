@@ -38,14 +38,15 @@ password: Baylor123
   - player roster
   - each player's batting statistics
   - each player's pitching statistics
-- Linear regression to predict % wins for current year based on data from last 20 years (OB %, slug %, whip %, .....) ---------------------------
+- Linear regression to predict % wins for current year based on data from last 20 years 
+  - Uses Team OBP, SLG%, WHIP, and Kper9 to make a prediction
   - if insufficient data (ex: no SF calculated for the year), prediction is omitted
-  - if team has not been active for the past 20 years, predicted is omitted
+  - if team has not been active for the past 20 years, prediction is omitted
   - result is compared to actual % wins
   
 ## Installation
 1. Create a new database called ```highestgradeever``` and run ```\. highestgradeever``` to initialize the updated database.
-2. Update ```csi3335sp2023.py``` to contain your username and password.
+2. Update ```csi3335sp2023.py``` to contain your username and password for MariaDB.
 3. Install all required python modules listed below into your virtual environment.
 
 ### Imported Python Modules:
@@ -59,7 +60,6 @@ password: Baylor123
 - flask-wtf
 - flask-migrate
 - sklearn
-- ... (these are all that are listed on the website, remove what we didn't use) -------------------------------
 
 ## How to Update the Database
 1. Run ```python renameIDs.py``` to rename ID attributes.
@@ -68,4 +68,4 @@ password: Baylor123
 ## How to Run the Web Application
 1. Navigate to the subdirectory `GroupProjectFlask/`
 2. Run `flask run`
-2. Access the web app at `http://localhost:/` ----------------------------
+2. Access the web app at `http://localhost:/`
