@@ -4,7 +4,6 @@ from app.forms import LoginForm, RegistrationForm, StatsForm
 from flask_login import current_user, login_user, logout_user
 from app.models import User
 from flask_login import login_required
-from numpy.core.defchararray import isnumeric
 from werkzeug.urls import url_parse
 import pymysql
 import sys
@@ -162,7 +161,7 @@ def submit_form(teamName):
     if '?' in chosenTeam:
         chosenTeam = chosenTeam.replace('?', '/')
     chosenYear = stats_form.year.choices[stats_form.year.data - 1][1]
-    print(str(chosenYear) + chosenTeam)
+    print(str(chosenYear), chosenTeam)
     # session[ 'chosenTeam' ] = request.form['team']
     # session[ 'chosenYear' ] = request.form['year']
     if chosenTeam is None or chosenTeam == 'None':
@@ -176,7 +175,7 @@ def submit_form(teamName):
         
         id = current_user.username       
         sql2 = ''' insert into users values(%s,%s,%s); '''
-        cur.execute(sql2, [id,chosenTeam, chosenYear])
+        cur.execute(sql2, [id, chosenTeam, chosenYear])
           
         # get teamID
 
@@ -188,7 +187,7 @@ def submit_form(teamName):
 
         # print( sql % ( chosenTeam, chosenYear ) )
 
-        chosenTeamID = cur.fetchall()[0][0]
+        chosenTeamID = cur.fetchall()
         # print(chosenTeamID)
         # print(chosenTeamID)
 
@@ -295,6 +294,7 @@ def submit_form(teamName):
                      (3 * IFNULL(b_3B, 0)) + (4 * IFNULL(b_HR, 0)))) / SUM(IFNULL(b_AB, 0)) AS SLG
                  FROM batting
                  WHERE playerid=%s AND yearId=%s AND teamID=%s
+                    AND b_R IS NOT NULL
                  '''
             # print(sql % (playerID, chosenYear, chosenTeamID))
             cur.execute(sql, [playerID, chosenYear, chosenTeamID])
@@ -337,29 +337,26 @@ def submit_form(teamName):
         con.commit()
 
     
-    # ---- Machine Learning Prediciont ---- #
+    # ---- Machine Learning Prediction ---- #
 
     team_stats = []
-    stat_names = [ 'yearID', 'team_H', 'team_BB', 'team_HBP', 
+    stat_names = [ 'yearID', 'team_H', 'team_BB', 'team_BBA', 'team_HBP',
                    'team_AB', 'team_SF', 'team_R', 'team_2B', 
                    'team_3B', 'team_HR', 'team_IPouts', 'team_SO', 
                    'team_W_Per' ]
 
     try:
         cur = con.cursor()
-        sql = '''SELECT yearID, team_H, team_BB, team_HBP, 
+        sql = '''SELECT yearID, team_H, team_BB, team_BBA, team_HBP, 
                  team_AB, team_SF, team_R, team_2B, team_3B, 
                  team_HR, team_IPouts, team_SO, team_W / team_G * 100 AS team_W_Per
                  FROM teams 
-                 WHERE teamid = ANY( 
-                    SELECT DISTINCT(teamid) 
-                    FROM teams 
-                    WHERE yearid > 2020 ) 
-                 AND yearid >= 2000 AND team_name = %s
-                 ORDER BY teamid, yearID;'''
+                 WHERE team_name = %s AND yearID BETWEEN %s AND %s 
+                 ORDER BY yearID'''
 
-        cur.execute( sql, [chosenTeam] )
+        cur.execute( sql, [chosenTeam, chosenYear-20, chosenYear] )
         stats = cur.fetchall()
+
 
         for row in stats:
             team_stat = []
@@ -374,16 +371,16 @@ def submit_form(teamName):
     else:
         con.commit()
 
-    if( len( team_stats ) == 0 ):
+    if( len( team_stats ) < 20 ):
          return render_template('stats.html', title='stats', chosenTeam=chosenTeam, chosenYear=chosenYear, roster=rosterList,
-                           battingStats=battingStats, pitching_data=pitchingStats, next_year='2022')
+                           battingStats=battingStats, pitching_data=pitchingStats, curr_year=chosenYear)
 
     df = pd.DataFrame( team_stats, columns = stat_names )
-    df = df.drop( df[df.yearID == 2020].index )
+
 
     OBP = ( df['team_H'] + df['team_BB'] + df['team_HBP'] ) / ( df['team_AB'] + df['team_BB'] + df['team_HBP'] + df['team_SF'] )
     SLG = ( df['team_R'] - df['team_2B'] - df['team_3B'] - df['team_HR'] + 2*df['team_2B'] + 3*df['team_3B'] + 4*df['team_HR'] ) / df['team_AB']
-    WHIP = ( df['team_H'] + df['team_BB'] ) / ( df['team_IPouts']/3 )
+    WHIP = ( df['team_H'] + df['team_BBA'] ) / ( df['team_IPouts']/3 )
     Kper9 = ( df['team_SO'] / ( df['team_IPouts'] / 3 ) )
 
     derivedDf = pd.DataFrame( { 'yearID' : df['yearID'], 'OBP' : OBP, 'SLG' : SLG, 'WHIP': WHIP, 'Kper9' : Kper9 } )
@@ -391,21 +388,19 @@ def submit_form(teamName):
     derivedDf['team_W_Per'] = df['team_W_Per']
     
     df = derivedDf
+    currTeam = df.iloc[-1]
+    df = df.iloc[:-1 , :]
+    df = df.dropna().reset_index(drop=True)
 
-    # print(df)
 
     features = ['OBP', 'SLG', 'WHIP', 'Kper9']
     X = np.array( df[ features ] )
     y = np.array( df[ 'team_W_Per' ] )
 
+
+    currTeamStats = [ currTeam['OBP'], currTeam['SLG'], currTeam['WHIP'], currTeam['Kper9'] ]
     reg = LinearRegression().fit(X, y)
-
-    avg_stats = []
-    for name in derivedDf.columns:
-        if name != 'yearID' and name != 'team_W_Per':
-            avg_stats.append( derivedDf.loc[ df['yearID'] > 2017, name ].mean() )
-
-    prediction = reg.predict( np.array([avg_stats]) )
+    prediction = reg.predict( np.array( [currTeamStats] ))
 
     kf = KFold(n_splits=5)
     RMSEs = []
@@ -426,12 +421,15 @@ def submit_form(teamName):
 
         RMSEs.append( round(mse, 2) )
 
+    print("Cross Validation RMSE Scores for: " + str(chosenTeam) + " in " + str(chosenYear))
+    print(RMSEs)
 
     # ---- End Machine Learning Section --- #
 
     
     return render_template('stats.html', title='stats', chosenTeam=chosenTeam, chosenYear=chosenYear, roster=rosterList,
-                           battingStats=battingStats, pitching_data=pitchingStats, prediction=round(prediction[0], 2), RMSEs=RMSEs, next_year='2022')
+                           battingStats=battingStats, pitching_data=pitchingStats, prediction=round(prediction[0], 2),
+                           actual=currTeam['team_W_Per'], curr_year=chosenYear)
 #change 2.
         
 @app.route('/admin')
