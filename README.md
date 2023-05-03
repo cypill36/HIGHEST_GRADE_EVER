@@ -30,8 +30,6 @@ password: Baylor123
     - Fielding, FieldingPost
     - HomeGames
     - SeriesPost
-- User table and log table added to database (createTables.sql)
-
 
 ## Web Features
 - User login/signup with username and encrypted password
@@ -40,7 +38,7 @@ password: Baylor123
   - player roster
   - each player's batting statistics
   - each player's pitching statistics
-- Linear regression to predict % wins for current year based on data from last 20 years (OB %, slug %, whip %, .....) ---------------------------------
+- Linear regression to predict % wins for current year based on data from last 20 years (OB %, slug %, whip %, .....) ---------------------------
   - if insufficient data (ex: no SF calculated for the year), prediction is omitted
   - if team has not been active for the past 20 years, predicted is omitted
   - result is compared to actual % wins
@@ -61,7 +59,7 @@ password: Baylor123
 - flask-wtf
 - flask-migrate
 - sklearn
-- ... (these are all that are listed on the website, remove what we didn't use) ----------------------------------------------------------------
+- ... (these are all that are listed on the website, remove what we didn't use) -------------------------------
 
 ## How to Update the Database
 1. Run ```python renameIDs.py``` to rename ID attributes.
@@ -69,4 +67,4 @@ password: Baylor123
 
 ## How to Run the Web Application
 1. ```flask run```  ---------------------------------------------
-2. Access it at `http://localhost:????/` ----------------------------------------------------
+2. Access it at `http://localhost:????/` --------------------------------------
