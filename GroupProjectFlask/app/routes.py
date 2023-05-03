@@ -4,6 +4,7 @@ from app.forms import LoginForm, RegistrationForm, StatsForm
 from flask_login import current_user, login_user, logout_user
 from app.models import User
 from flask_login import login_required
+from numpy.core.defchararray import isnumeric
 from werkzeug.urls import url_parse
 import pymysql
 import sys
@@ -187,8 +188,8 @@ def submit_form(teamName):
 
         # print( sql % ( chosenTeam, chosenYear ) )
 
-        chosenTeamID = cur.fetchall()
-        print(chosenTeamID)
+        chosenTeamID = cur.fetchall()[0][0]
+        # print(chosenTeamID)
         # print(chosenTeamID)
 
         # Getting roster 
@@ -285,26 +286,36 @@ def submit_form(teamName):
                 elif row[0] in positionCounts.keys():
                     battingStats[playerID][positionCounts[row[0]]] = row[1]
 
-            sql = '''SELECT IFNULL(b_H, 0)/IFNULL(b_AB, 1) AS BA, (IFNULL(b_H, 0) + IFNULL(b_BB, 0) + IFNULL(b_HBP, 0))/
-                     (IFNULL(b_AB, 0) + IFNULL(b_BB, 0) + IFNULL(b_HBP, 0) + IFNULL(b_SF, 0)) AS OBP, 
-                     ((b_R - IFNULL(b_2B, 0) - IFNULL(b_3B, 0) - IFNULL(b_HR, 0)) + (2 * IFNULL(b_2B, 0)) + 
-                     (3 * IFNULL(b_3B, 0)) + (4 * IFNULL(b_HR, 0))) / IFNULL(b_AB, 1) AS SLG
+            sql = '''SELECT SUM(IFNULL(b_H, 0))/SUM(IFNULL(b_AB, 0)) AS BA, 
+            
+                     SUM((IFNULL(b_H, 0) + IFNULL(b_BB, 0) + IFNULL(b_HBP, 0)))/
+                     SUM((IFNULL(b_AB, 0) + IFNULL(b_BB, 0) + IFNULL(b_HBP, 0) + IFNULL(b_SF, 0))) AS OBP, 
+                     
+                     SUM(((IFNULL(b_H, 0) - IFNULL(b_2B, 0) - IFNULL(b_3B, 0) - IFNULL(b_HR, 0)) + (2 * IFNULL(b_2B, 0)) + 
+                     (3 * IFNULL(b_3B, 0)) + (4 * IFNULL(b_HR, 0)))) / SUM(IFNULL(b_AB, 0)) AS SLG
                  FROM batting
                  WHERE playerid=%s AND yearId=%s AND teamID=%s
-                    AND b_R IS NOT NULL
                  '''
-
+            # print(sql % (playerID, chosenYear, chosenTeamID))
             cur.execute(sql, [playerID, chosenYear, chosenTeamID])
 
             last3Stats = cur.fetchall()
 
             if len(last3Stats) == 0:
-                print(playerID)
+                # print(playerID)
                 toDelete.append(playerID)
             for row in last3Stats:
                 for col in row:
                     battingStats[playerID].append(col)
-
+            delete_player = True
+            for stat in battingStats[playerID]:
+                if not delete_player or not str(stat).isnumeric():
+                    continue
+                if stat != 0 and stat is not None:
+                    # print(playerID + ' ' + str(stat))
+                    delete_player = False
+            if delete_player and playerID not in toDelete:
+                toDelete.append(playerID)
             playerIDs.append(playerID)
 
         for playerID in playerIDs:
@@ -381,7 +392,7 @@ def submit_form(teamName):
     
     df = derivedDf
 
-    print(df)
+    # print(df)
 
     features = ['OBP', 'SLG', 'WHIP', 'Kper9']
     X = np.array( df[ features ] )
