@@ -21,7 +21,9 @@ from sklearn.metrics import mean_squared_error
 
 con = pymysql.connect(host=cfig.con['host'], user=cfig.con['user'], password=cfig.con['password'],
                       database=cfig.con['database'])
-
+cur = con.cursor()
+sql1 = ''' CREATE TABLE IF NOT EXISTS users (id VARCHAR(50), team_name VARCHAR(50), yearid INT); '''
+cur.execute(sql1)
 
 @app.route('/')
 def root():
@@ -84,6 +86,7 @@ def index(teamName):
     '''
     years = []
     cur = con.cursor()
+
     disabled = True
     if teamName is not None and teamName != 'None' and teamName != ' ':
         if '?' in teamName:
@@ -169,8 +172,12 @@ def submit_form(teamName):
 
     try:
         cur = con.cursor()
+ 
         # make the table and update it for the admin
-        
+    
+        sql1 = ''' CREATE TABLE IF NOT EXISTS users (id VARCHAR(50), team_name VARCHAR(50), yearid INT); '''
+        cur.execute(sql1)
+
         id = current_user.username       
         sql2 = ''' insert into users values(%s,%s,%s); '''
         cur.execute(sql2, [id, chosenTeam, chosenYear])
@@ -460,6 +467,6 @@ def admin():
         cur.close()        
         return render_template("admin.html", title='Admin', results=results)
     else:           
-        flash("sorry you are not the admine bro!!!")
+        flash("sorry you are not the admin bro!!!")
         return redirect(url_for('login'))
 
