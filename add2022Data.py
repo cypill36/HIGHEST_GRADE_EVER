@@ -100,7 +100,7 @@ try:
                 for s in splitLine:
                     s = s.strip()
                     insertSql += "%s, "
-                    if s == "NA" or s == "\n" or len(s) == 0:
+                    if s == "NA" or s == "\n" or len(s) == 0 or s == 'inf':
                         valuesList.append(None)
                     elif s.isnumeric():
                         valuesList.append(int(s))
@@ -126,7 +126,8 @@ try:
                         insert = True
 
                 if insert:
-                    # print(insertSql, valuesList)
+                    #print(insertSql, valuesList)
+
                     cur.execute(insertSql, valuesList)
                 elif update:
                     updateSql = "UPDATE " + table_name + " SET "
