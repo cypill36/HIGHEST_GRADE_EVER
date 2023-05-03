@@ -63,8 +63,9 @@ password: Baylor123
 
 ## How to Update the Database
 1. Run ```python renameIDs.py``` to rename ID attributes.
-2. Run ```python add2022Data.py``` to update the database. (Warning: this can take about 5 minutes to run!)
+2. Run ```python add2022Data.py``` to update the database. (Warning: this can take a few minutes to run!)
 
 ## How to Run the Web Application
-1. ```flask run```  ---------------------------------------------
-2. Access it at `http://localhost:????/` --------------------------------------
+1. Navigate to the subdirectory `GroupProjectFlask/`
+2. Run `flask run`
+2. Access the web app at `http://localhost:/` ----------------------------
