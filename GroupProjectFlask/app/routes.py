@@ -8,7 +8,7 @@ from werkzeug.urls import url_parse
 import pymysql
 import sys
 import warnings
-import csi3335 as cfig
+import csi3335sp2023 as cfig
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression
